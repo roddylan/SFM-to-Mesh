@@ -1,0 +1,6 @@
+open3d
+numpy
+scipy
+plotly
+scikit-learn
+skimage
