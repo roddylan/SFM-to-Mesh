@@ -3,4 +3,5 @@ numpy
 scipy
 plotly
 scikit-learn
-skimage
+scikit-image
+opencv-contrib-python
