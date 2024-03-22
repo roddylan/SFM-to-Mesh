@@ -5,3 +5,4 @@ plotly
 scikit-learn
 scikit-image
 opencv-contrib-python
+ipykernel
