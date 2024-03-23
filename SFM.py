@@ -78,7 +78,7 @@ class SFM:
         # print(f"ELAPSED TIME:\n{end-start}")
 
     def ft_match(self):
-        # RANSAC
+        # LO-RANSAC
         print("\nMATCHING...\n")
         self.matches = {}
         self.mask = {}
@@ -112,6 +112,9 @@ class SFM:
                     src_pts = np.float32([ self.kp[i][m.queryIdx].pt for m in self.good[(i,j)] ]).reshape(-1,1,2)
                     dst_pts = np.float32([ self.kp[j][m.trainIdx].pt for m in self.good[(i,j)] ]).reshape(-1,1,2)
 
+                    self.src_pts[(i,j)] = src_pts
+                    self.dst_pts[(i,j)] = dst_pts
+
                     M, mask = cv2.findHomography(src_pts, dst_pts, cv2.USAC_DEFAULT, 5.0)
                     self.M[(i,j)] = M
                     self.mask[(i,j)] = mask
@@ -123,15 +126,6 @@ class SFM:
                     # pts = np.float32([ [0,0],[0,h-1],[w-1,h-1],[w-1,0] ]).reshape(-1,1,2)
                 else:
                     print(f"Insufficient Matches for {(i,j)}")
-
-
-
-        
-
-        
-        
-
-
 
         end = time.time()
         elapsed = end - start # ms
@@ -175,5 +169,3 @@ if __name__ == "__main__":
     test1 = SFM(src="test1/imgs")
 
     kp, desc = test1.ft_extract()
-    np.save("out1/kp.npy", np.array(kp))
-    np.save("out1/desc.npy", np.array(desc))
