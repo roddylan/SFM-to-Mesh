@@ -3,6 +3,7 @@ import cv2
 import scipy
 from skimage.measure import ransac
 import time, os, shutil, platform
+import progressbar
 
 class SFM:
     def __init__(self, src):
@@ -25,7 +26,9 @@ class SFM:
         files = os.listdir(src)
         files.sort()
 
-        for f in files:
+        # for f in files:
+        for i in progressbar.progressbar(range(len(files)), redirect_stdout=True):
+            f = files[i]
             try:
                 if platform.system() == "Windows":
                     im = cv2.imread(f"{src}\{f}")
@@ -49,7 +52,10 @@ class SFM:
         self.kp = []
         self.desc = []
         
-        for im in self.im:
+        print("FEATURE EXTRACTION....")
+        # for im in self.im:
+        for i in progressbar.progressbar(range(len(self.im)), redirect_stdout=True):
+            im = self.im[i]
             kp = self.detector.detect(im)
             desc = self.descriptor.compute(im, kp)
 
@@ -59,9 +65,9 @@ class SFM:
             self.desc.append(desc)
         
         end = time.time()
-        print(f"KEYPOINTS:\n{self.kp}\n")
-        print(f"DESCRIPTORS:\n{self.desc}")
-        print(f"ELAPSED TIME:\n{end-start}")
+        # print(f"KEYPOINTS:\n{self.kp}\n")
+        # print(f"DESCRIPTORS:\n{self.desc}")
+        # print(f"ELAPSED TIME:\n{end-start}")
 
     def ft_match(self):
         # RANSAC
