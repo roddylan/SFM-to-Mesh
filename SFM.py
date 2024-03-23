@@ -1,18 +1,20 @@
 import numpy as np
 import cv2
 import scipy
-from skimage.measure import ransac  
-import time, os, shutil
+from skimage.measure import ransac
+import time, os, shutil, platform
 
 class SFM:
     def __init__(self, src):
         self.get_imgs(src)
+        
+        # self.brisk = cv2.BRISK_create() # TODO: maybe just use BRISK - BRISK
+
         self.detector = cv2.BRISK_create()
         self.descriptor = cv2.xfeatures2d.SIFT_create()
-        # pass
 
     def pre_proc_img(self):
-        # bbox + radial distortion
+        # create bbox + get rid of radial distortion
         pass
 
 
@@ -24,19 +26,42 @@ class SFM:
         files.sort()
 
         for f in files:
-            im = cv2.imread(files)
-            self.im.append(im)
-            gim = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
-            self.gim.append(gim)
+            try:
+                if platform.system() == "Windows":
+                    im = cv2.imread(f"{src}\{f}")
+                else:
+                    im = cv2.imread(f"{src}/{f}")
+                    # print(f"{src}/{f}")
+                gim = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
+                
+                self.im.append(im)
+                self.gim.append(gim)
+
+            except:
+                print(f"{f} is not an img...\n")
  
         # pass
 
     def ft_extract(self):
         # BRISK features
-        self.kp = []
-        
-        pass
+        start = time.time()
 
+        self.kp = []
+        self.desc = []
+        
+        for im in self.im:
+            kp = self.detector.detect(im)
+            desc = self.descriptor.compute(im, kp)
+
+            # kp, desc = self.brisk.detectAndCompute(im, )
+
+            self.kp.append(kp)
+            self.desc.append(desc)
+        
+        end = time.time()
+        print(f"KEYPOINTS:\n{self.kp}\n")
+        print(f"DESCRIPTORS:\n{self.desc}")
+        print(f"ELAPSED TIME:\n{end-start}")
 
     def ft_match(self):
         # RANSAC
@@ -83,4 +108,6 @@ class SFM:
 
 
 if __name__ == "__main__":
-    test1 = SFM(src="test1")
+    test1 = SFM(src="test1/imgs")
+
+    test1.ft_extract()
