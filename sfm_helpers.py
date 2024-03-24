@@ -3,6 +3,7 @@ import os, platform
 import numpy as np
 
 class Rec:
+    @staticmethod
     def best_pair(adj, matches, kp, K, thresh=.2):
 
         n_matches = []
@@ -23,17 +24,23 @@ class Rec:
             for j in range(adj.shape[1]):
                 if adj[i,j] == 1:
                     if len(matches[(i,j)]) > min_matches:
-                        pass
+                        kpi, kpj, kpi_idx, kpj_idx = Rec.get_aligned_pts()
 
 
+    @staticmethod
+    def get_aligned_pts(i, j, kp, matches, mask=None):
+        if mask is None:
+            mask = np.ones(len(matches[(i, j)]))
 
-    def get_aligned_pts(i, j, kp, matches):
-        pass
+        
+        
 
 
 
 
 class Helper:
+    
+    @staticmethod
     def load_img(src):
         files = os.listdir(src)
         files.sort()
@@ -55,6 +62,7 @@ class Helper:
 
         return imgs, gimgs
 
+    @staticmethod
     def get_intrinsic(cb_sz: tuple, res: tuple, imgs, gimgs):
         criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, .001)
 
