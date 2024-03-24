@@ -115,7 +115,8 @@ class SFM:
                     self.src_pts[(i,j)] = src_pts
                     self.dst_pts[(i,j)] = dst_pts
 
-                    M, mask = cv2.findHomography(src_pts, dst_pts, cv2.USAC_DEFAULT, 5.0)
+                    # M, mask = cv2.findHomography(src_pts, dst_pts, cv2.USAC_DEFAULT, 5.0)
+                    M, mask = cv2.findHomography(src_pts, dst_pts, cv2.USAC_FAST, 5.0)
                     self.M[(i,j)] = M
                     self.mask[(i,j)] = mask
 
