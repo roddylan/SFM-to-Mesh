@@ -153,21 +153,30 @@ class SFM:
                         self.good[(i,j)] = []
                         continue
 
-
-                    # matchesMasks = mask.ravel().tolist()
-                    
-                    # h,w = self.gim[0].shape
-
-                    # pts = np.float32([ [0,0],[0,h-1],[w-1,h-1],[w-1,0] ]).reshape(-1,1,2)
                 else:
-                    # print(f"Insufficient Matches for {(i,j)}")
-                    # pbar.write(f"Insufficient Matches for {(i,j)}")
                     pbar.set_description(f"Insufficient Matches for {(i,j)}")
 
         end = time.time()
         elapsed = end - start # ms
         print(f"Elapsed Time: {elapsed}\n\n")
         return self.good
+
+    def adj_list(self, matches=None):
+        if not matches:
+            matches = self.good
+        
+        n_pairs = 0
+        pairs = []
+        self.adj = np.zeros((self.n, self.n))
+        
+        for i in range(self.n-1):
+            for j in range(i, self.n):
+                if len(matches[(i, j)]) > 0:
+                    n_pairs += 1
+                    pairs.append((i,j))
+                    self.adj[i][j] = 1
+
+        return self.adj, pairs
 
 
     def bundle_adjustment(self):
