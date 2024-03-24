@@ -9,3 +9,4 @@ ipykernel
 progressbar2
 tqdm
 matplotlib
+pyntcloud
