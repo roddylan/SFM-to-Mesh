@@ -8,13 +8,17 @@ from tqdm import tqdm
 from collections import defaultdict
 
 class SFM:
-    def __init__(self, src):
+    def __init__(self, src, K=None):
+        self.K = K
+
         self.get_imgs(src)
         
         # self.brisk = cv2.BRISK_create() # TODO: maybe just use BRISK - BRISK
 
         self.detector = cv2.BRISK_create()
         self.descriptor = cv2.SIFT_create()
+
+        
 
     def pre_proc_img(self):
         # create bbox + get rid of radial distortion
@@ -174,6 +178,9 @@ class SFM:
 
         return self.adj, pairs
 
+    
+
+
 
     def bundle_adjustment(self):
         pass
@@ -186,26 +193,6 @@ class SFM:
         end = time.time()
         elapsed = end - start # ms
         pass
-
-    '''
-    def _fmatch(self, kp1, kp2, matches, ratio = 0.75):
-        mkp1, mkp2, good= [], [], []
-        for m in matches:
-            if len(m) == 2 and m[0].distance < m[1].distance * ratio:
-                m = m[0]
-                mkp1.append( kp1[m.queryIdx] )
-                mkp2.append( kp2[m.trainIdx] )
-                good.append(m)
-        p1 = np.float32([kp.pt for kp in mkp1])
-        p2 = np.float32([kp.pt for kp in mkp2])
-        kp_pairs = zip(mkp1, mkp2)
-        return p1, p2, kp_pairs, good
-    
-
-    def _smatch(self):
-        pass
-    '''
-
 
 
 if __name__ == "__main__":
