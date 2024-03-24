@@ -8,3 +8,4 @@ opencv-contrib-python
 ipykernel
 progressbar2
 tqdm
+matplotlib

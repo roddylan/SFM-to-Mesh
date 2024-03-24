@@ -98,9 +98,11 @@ class SFM:
         flann = cv2.FlannBasedMatcher(index_params, search_params)
         self.good = defaultdict(list)
         
-        for i in range(N-1):
+        pbar = tqdm(range(N-1))
+        for i in pbar:
             for j in range(i+1, N):
-                print(f"{(i,j)}\n")
+                # print(f"{(i,j)}\n")
+                pbar.set_description(f"{(i,j)}\n")
                 self.matches[(i,j)] = flann.knnMatch(self.desc[i][1], self.desc[j][1], 2)
                 
                 # Lowe's
@@ -126,11 +128,12 @@ class SFM:
 
                     # pts = np.float32([ [0,0],[0,h-1],[w-1,h-1],[w-1,0] ]).reshape(-1,1,2)
                 else:
-                    print(f"Insufficient Matches for {(i,j)}")
+                    # print(f"Insufficient Matches for {(i,j)}")
+                    pbar.write(f"Insufficient Matches for {(i,j)}")
 
         end = time.time()
         elapsed = end - start # ms
-        print(elapsed)
+        print(f"Elapsed Time: {elapsed}\n\n")
 
 
     def bundle_adjustment(self):
