@@ -152,7 +152,7 @@ class SFM:
         elapsed = end - start # ms
         pass
 
-
+    '''
     def _fmatch(self, kp1, kp2, matches, ratio = 0.75):
         mkp1, mkp2, good= [], [], []
         for m in matches:
@@ -169,7 +169,7 @@ class SFM:
 
     def _smatch(self):
         pass
-
+    '''
 
 
 
