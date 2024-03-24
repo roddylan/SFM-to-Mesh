@@ -121,7 +121,8 @@ class SFM:
 
                     # M, mask = cv2.findHomography(src_pts, dst_pts, cv2.USAC_DEFAULT, 5.0)
                     # TODO: change hyper params
-                    M, mask = cv2.findHomography(src_pts, dst_pts, cv2.USAC_FAST, 5.0)
+                    # M, mask = cv2.findHomography(src_pts, dst_pts, cv2.USAC_FAST, 5.0)
+                    M, mask = cv2.findHomography(src_pts, dst_pts, cv2.USAC_MAGSAC, 5.0)
                     self.M[(i,j)] = M
                     self.mask[(i,j)] = mask
 
