@@ -83,6 +83,8 @@ class SFM:
         self.matches = {}
         self.mask = {}
         self.M = {}
+        self.src_pts = {}
+        self.dst_pts = {}
         start = time.time()
         
         norm = cv2.NORM_HAMMING
