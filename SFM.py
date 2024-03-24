@@ -83,6 +83,8 @@ class SFM:
         self.matches = {}
         self.mask = {}
         self.M = {}
+        self.src_pts = {}
+        self.dst_pts = {}
         start = time.time()
         
         norm = cv2.NORM_HAMMING
@@ -102,7 +104,7 @@ class SFM:
         for i in pbar:
             for j in range(i+1, N):
                 # print(f"{(i,j)}\n")
-                pbar.set_description(f"{(i,j)}\n")
+                pbar.set_description(f"{(i,j)}")
                 self.matches[(i,j)] = flann.knnMatch(self.desc[i][1], self.desc[j][1], 2)
                 
                 # Lowe's
