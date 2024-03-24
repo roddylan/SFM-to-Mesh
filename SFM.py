@@ -67,6 +67,7 @@ class SFM:
             desc = self.descriptor.compute(im, kp)
 
             # kp, desc = self.brisk.detectAndCompute(im, None)
+            # kp, desc = self.descriptor.detectAndCompute(im, None)
 
             self.kp.append(kp)
             self.desc.append(desc)
@@ -110,6 +111,7 @@ class SFM:
                 # print(f"{(i,j)}\n")
                 pbar.set_description(f"{(i,j)}")
                 self.matches[(i,j)] = flann.knnMatch(self.desc[i][1], self.desc[j][1], 2)
+                # self.matches[(i,j)] = flann.knnMatch(self.desc[i], self.desc[j], 2)
                 
                 # Lowe's
                 for m, n in self.matches[(i, j)]:
@@ -123,16 +125,10 @@ class SFM:
                     self.src_pts[(i,j)] = src_pts
                     self.dst_pts[(i,j)] = dst_pts
 
-                    # M, mask = cv2.findHomography(src_pts, dst_pts, cv2.USAC_DEFAULT, 5.0)
                     # TODO: change hyper params
-                    # M, mask = cv2.findHomography(src_pts, dst_pts, cv2.USAC_FAST, 5.0)
-                    # M, mask = cv2.findHomography(src_pts, dst_pts, cv2.USAC_MAGSAC, 5.0)
-                    # self.M[(i,j)] = M
-                    # self.mask[(i,j)] = mask
-
-                    # M, mask = cv2.findHomography(src_pts, dst_pts, cv2.USAC_MAGSAC, 5.0)
-                    # F, mask = cv2.findFundamentalMat(src_pts, dst_pts, cv2.USAC_MAGSAC, ransacReprojThreshold=5.0)
-                    F, mask = cv2.findFundamentalMat(src_pts, dst_pts, cv2.USAC_MAGSAC, ransacReprojThreshold=3.0)
+                    # F, mask = cv2.findFundamentalMat(src_pts, dst_pts, cv2.USAC_MAGSAC, ransacReprojThreshold=4.5)
+                    # F, mask = cv2.findFundamentalMat(src_pts, dst_pts, cv2.USAC_MAGSAC, ransacReprojThreshold=3.0)
+                    F, mask = cv2.findFundamentalMat(src_pts, dst_pts, cv2.USAC_MAGSAC, 3.5)
                     # # self.M[(i,j)] = M
                     self.F[(i,j)] = F
                     self.mask[(i,j)] = mask
