@@ -28,10 +28,12 @@ class SFM:
         files = os.listdir(src)
         files.sort()
         pbar = tqdm(files)
+        self.n = 0
 
         for f in pbar:
         # for i in progressbar.progressbar(range(len(files)), redirect_stdout=True):
             # f = files[i]
+            self.n += 1
             pbar.set_description(f"{f}")
             try:
                 if platform.system() == "Windows":
@@ -46,7 +48,6 @@ class SFM:
 
             except:
                 pbar.write(f"{f} is not an img...\n")
- 
         # pass
 
     def ft_extract(self):
@@ -81,10 +82,13 @@ class SFM:
         # LO-RANSAC
         print("\nMATCHING...\n")
         self.matches = {}
-        self.mask = {}
-        self.M = {}
         self.src_pts = {}
         self.dst_pts = {}
+        
+        # self.mask = {}
+        # self.M = {}
+        self.mask = {}
+        self.F = {}
         start = time.time()
         
         norm = cv2.NORM_HAMMING
@@ -122,9 +126,33 @@ class SFM:
                     # M, mask = cv2.findHomography(src_pts, dst_pts, cv2.USAC_DEFAULT, 5.0)
                     # TODO: change hyper params
                     # M, mask = cv2.findHomography(src_pts, dst_pts, cv2.USAC_FAST, 5.0)
-                    M, mask = cv2.findHomography(src_pts, dst_pts, cv2.USAC_MAGSAC, 5.0)
-                    self.M[(i,j)] = M
+                    # M, mask = cv2.findHomography(src_pts, dst_pts, cv2.USAC_MAGSAC, 5.0)
+                    # self.M[(i,j)] = M
+                    # self.mask[(i,j)] = mask
+
+                    # M, mask = cv2.findHomography(src_pts, dst_pts, cv2.USAC_MAGSAC, 5.0)
+                    # F, mask = cv2.findFundamentalMat(src_pts, dst_pts, cv2.USAC_MAGSAC, ransacReprojThreshold=5.0)
+                    F, mask = cv2.findFundamentalMat(src_pts, dst_pts, cv2.USAC_MAGSAC, ransacReprojThreshold=3.0)
+                    # # self.M[(i,j)] = M
+                    self.F[(i,j)] = F
                     self.mask[(i,j)] = mask
+                    # print(np.linalg.det(F) > 1e-7)
+
+                    self.good[(i,j)] = np.array(self.good[(i,j)])
+                    
+                    if mask is None:
+                        self.good[(i,j)] = []
+                        continue
+                    
+                    # print(mask.ravel()==1)
+                    
+                    self.good[(i,j)] = self.good[(i,j)][mask.ravel() == 1]
+                    self.good[(i,j)] = list(self.good[(i,j)])
+
+                    if len(self.good[(i,j)]) < 20:
+                        self.good[(i,j)] = []
+                        continue
+
 
                     # matchesMasks = mask.ravel().tolist()
                     
@@ -139,6 +167,7 @@ class SFM:
         end = time.time()
         elapsed = end - start # ms
         print(f"Elapsed Time: {elapsed}\n\n")
+        return self.good
 
 
     def bundle_adjustment(self):
