@@ -104,7 +104,7 @@ class SFM:
         for i in pbar:
             for j in range(i+1, N):
                 # print(f"{(i,j)}\n")
-                pbar.set_description(f"{(i,j)}\n")
+                pbar.set_description(f"{(i,j)}")
                 self.matches[(i,j)] = flann.knnMatch(self.desc[i][1], self.desc[j][1], 2)
                 
                 # Lowe's
