@@ -120,18 +120,20 @@ class SFM:
                     self.dst_pts[(i,j)] = dst_pts
 
                     # M, mask = cv2.findHomography(src_pts, dst_pts, cv2.USAC_DEFAULT, 5.0)
+                    # TODO: change hyper params
                     M, mask = cv2.findHomography(src_pts, dst_pts, cv2.USAC_FAST, 5.0)
                     self.M[(i,j)] = M
                     self.mask[(i,j)] = mask
 
-                    matchesMasks = mask.ravel().tolist()
+                    # matchesMasks = mask.ravel().tolist()
                     
-                    h,w = self.gim[0].shape
+                    # h,w = self.gim[0].shape
 
                     # pts = np.float32([ [0,0],[0,h-1],[w-1,h-1],[w-1,0] ]).reshape(-1,1,2)
                 else:
                     # print(f"Insufficient Matches for {(i,j)}")
-                    pbar.write(f"Insufficient Matches for {(i,j)}")
+                    # pbar.write(f"Insufficient Matches for {(i,j)}")
+                    pbar.set_description(f"Insufficient Matches for {(i,j)}")
 
         end = time.time()
         elapsed = end - start # ms
