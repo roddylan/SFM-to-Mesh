@@ -11,7 +11,7 @@ import sfm_helpers
 class SFM:
     def __init__(self, src, K=None):
         self.K = K
-
+        self.src = src
         self.get_imgs(src)
         
         # self.brisk = cv2.BRISK_create() # TODO: maybe just use BRISK - BRISK
@@ -29,6 +29,7 @@ class SFM:
     def get_imgs(self, src):
         self.im = []
         self.gim = []
+        self.itoimg = {}
 
         files = os.listdir(src)
         files.sort()
@@ -47,6 +48,7 @@ class SFM:
                     # print(f"{src}/{f}")
                 gim = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
                 
+                self.itoimg[self.n] = f
                 self.n += 1
                 self.im.append(im)
                 self.gim.append(gim)
@@ -191,7 +193,70 @@ class SFM:
         best_pair = sfm_helpers.Rec.best_pair(self.adj, self.good, self.kp, self.K)
         
 
+    def output_match(self):
+        if platform.system() == "Windows":
+            f = open(f"{self.src}\\match.txt", "w+")
+            p = open(f"{self.src}\\pairs.txt", "w+")
+        else:
+            f = open(f"{self.src}/match.txt", "w+")
+            p = open(f"{self.src}/pairs.txt", "w+")
 
+        text = ""
+        pairs = ""
+        for i in range(self.n - 1):
+            for j in range(i+1, self.n):
+                if not self.good[(i, j)]:
+                    continue
+
+                im1 = self.itoimg[i]
+                im2 = self.itoimg[j]
+
+                cur = f"{im1} {im2}"
+                pairs += cur + "\n"
+
+
+                for m in self.good[(i, j)]:
+                    q = m.queryIdx
+                    t = m.trainIdx
+                    cur += f"\n{q} {t}"
+                cur += f"\n\n"
+                text += cur
+
+        f.write(text)
+        f.close()
+
+        p.write(pairs)
+        p.close()
+
+    def output_ft(self, i):
+        im = self.itoimg[i]
+        if platform.system() == "Windows":
+            f = open(f"{self.src}\\{im}.txt", "w+")
+        else:
+            f = open(f"{self.src}/{im}.txt", "w+")
+        
+        n_ft = self.desc[i][1].shape[0]
+        text = f"{n_ft} 128"
+
+        for j in range(n_ft):
+            x = self.desc[i][0][j].pt[0]
+            y = self.desc[i][0][j].pt[1]
+            scale = self.desc[i][0][j].size
+            orientation = self.desc[i][0][j].angle
+
+            D = desc[i][1][j].astype(np.int64).flatten()
+            D_txt = ' '.join([f"{d}" for d in D])
+            cur = f"\n{x} {y} {scale} {orientation} {D_txt}"
+            text += cur
+
+        f.write(text)
+        f.close()
+
+    def output(self):
+        for i in range(self.n):
+            self.output_ft(i)
+        
+        self.output_match()
 
 
     def bundle_adjustment(self):
