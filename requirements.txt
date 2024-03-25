@@ -1,5 +1,6 @@
 open3d
 numpy
+pandas
 scipy
 plotly
 scikit-learn
