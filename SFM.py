@@ -6,6 +6,7 @@ import time, os, shutil, platform
 import progressbar
 from tqdm import tqdm
 from collections import defaultdict
+import sfm_helpers
 
 class SFM:
     def __init__(self, src, K=None):
@@ -179,10 +180,20 @@ class SFM:
         return self.adj, pairs
 
     
+    def reconstruction(self):
+        if self.K is None:
+            raise AssertionError("Error: Camera matrix K not defined")
+        
+        # initial rec
+        best_pair = sfm_helpers.Rec.best_pair(self.adj, self.good, self.kp, self.K)
+        
+
 
 
 
     def bundle_adjustment(self):
+        if self.K is None:
+            raise AssertionError("Error: Camera matrix K not defined")
         pass
 
     def run(self):
