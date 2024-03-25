@@ -38,7 +38,6 @@ class SFM:
         for f in pbar:
         # for i in progressbar.progressbar(range(len(files)), redirect_stdout=True):
             # f = files[i]
-            self.n += 1
             pbar.set_description(f"{f}")
             try:
                 if platform.system() == "Windows":
@@ -48,6 +47,7 @@ class SFM:
                     # print(f"{src}/{f}")
                 gim = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
                 
+                self.n += 1
                 self.im.append(im)
                 self.gim.append(gim)
 
@@ -98,8 +98,8 @@ class SFM:
         start = time.time()
         
         norm = cv2.NORM_HAMMING
-        N = len(self.im)
-        MIN_MATCH_COUNT = 10
+        N = self.n
+        MIN_MATCH_COUNT = 12
         
         # https://docs.opencv.org/3.4/d1/de0/tutorial_py_feature_homography.html
         # TODO: change hyper params
@@ -150,12 +150,13 @@ class SFM:
                     self.good[(i,j)] = self.good[(i,j)][mask.ravel() == 1]
                     self.good[(i,j)] = list(self.good[(i,j)])
 
-                    if len(self.good[(i,j)]) < 20:
+                    if len(self.good[(i,j)]) < MIN_MATCH_COUNT:
                         self.good[(i,j)] = []
                         continue
 
                 else:
                     pbar.set_description(f"Insufficient Matches for {(i,j)}")
+                    self.good[(i,j)] = []
 
         end = time.time()
         elapsed = end - start # ms
