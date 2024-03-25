@@ -161,6 +161,8 @@ class SFM:
         end = time.time()
         elapsed = end - start # ms
         print(f"Elapsed Time: {elapsed}\n\n")
+        
+        self.matches = self.good
         return self.good
 
     def adj_list(self, matches=None):
