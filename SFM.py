@@ -86,7 +86,7 @@ class SFM:
         return self.kp, self.desc
         # print(f"ELAPSED TIME:\n{end-start}")
 
-    def ft_match(self):
+    def ft_match(self, mmc=15):
         # LO-RANSAC
         print("\nMATCHING...\n")
         self.matches = {}
@@ -101,7 +101,7 @@ class SFM:
         
         norm = cv2.NORM_HAMMING
         N = self.n
-        MIN_MATCH_COUNT = 12
+        MIN_MATCH_COUNT = min(15, mmc)
         
         # https://docs.opencv.org/3.4/d1/de0/tutorial_py_feature_homography.html
         # TODO: change hyper params
@@ -132,29 +132,32 @@ class SFM:
                     self.src_pts[(i,j)] = src_pts
                     self.dst_pts[(i,j)] = dst_pts
 
-                    # TODO: change hyper params
-                    # F, mask = cv2.findFundamentalMat(src_pts, dst_pts, cv2.USAC_MAGSAC, ransacReprojThreshold=4.5)
-                    # F, mask = cv2.findFundamentalMat(src_pts, dst_pts, cv2.USAC_MAGSAC, ransacReprojThreshold=3.0)
-                    F, mask = cv2.findFundamentalMat(src_pts, dst_pts, cv2.USAC_MAGSAC, 3.5)
-                    # # self.M[(i,j)] = M
-                    self.F[(i,j)] = F
-                    self.mask[(i,j)] = mask
-                    # print(np.linalg.det(F) > 1e-7)
+                    try:
+                        # TODO: change hyper params
+                        # F, mask = cv2.findFundamentalMat(src_pts, dst_pts, cv2.USAC_MAGSAC, ransacReprojThreshold=4.5)
+                        # F, mask = cv2.findFundamentalMat(src_pts, dst_pts, cv2.USAC_MAGSAC, ransacReprojThreshold=3.0)
+                        F, mask = cv2.findFundamentalMat(src_pts, dst_pts, cv2.USAC_MAGSAC, 3.0)
+                        # # self.M[(i,j)] = M
+                        self.F[(i,j)] = F
+                        self.mask[(i,j)] = mask
+                        # print(np.linalg.det(F) > 1e-7)
 
-                    self.good[(i,j)] = np.array(self.good[(i,j)])
-                    
-                    if mask is None:
-                        self.good[(i,j)] = []
-                        continue
-                    
-                    # print(mask.ravel()==1)
-                    
-                    self.good[(i,j)] = self.good[(i,j)][mask.ravel() == 1]
-                    self.good[(i,j)] = list(self.good[(i,j)])
+                        self.good[(i,j)] = np.array(self.good[(i,j)])
+                        
+                        if mask is None:
+                            self.good[(i,j)] = []
+                            continue
+                        
+                        # print(mask.ravel()==1)
+                        
+                        self.good[(i,j)] = self.good[(i,j)][mask.ravel() == 1]
+                        self.good[(i,j)] = list(self.good[(i,j)])
 
-                    if len(self.good[(i,j)]) < MIN_MATCH_COUNT:
-                        self.good[(i,j)] = []
-                        continue
+                        if len(self.good[(i,j)]) < MIN_MATCH_COUNT:
+                            self.good[(i,j)] = []
+                            continue
+                    except:
+                        pbar.write("RANSAC FAILED, MAY CONTAIN OUTLIERS")
 
                 else:
                     pbar.set_description(f"Insufficient Matches for {(i,j)}")
