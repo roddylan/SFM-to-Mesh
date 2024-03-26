@@ -40,7 +40,7 @@ class Rec:
                 if adj[i,j] == 1:
                     if len(matches[(i,j)]) > min_matches:
                         kpi, kpj, kpi_idx, kpj_idx = Rec.get_aligned_pts(i, j, kp, matches)
-                        E, _ = cv2.findEssentialMat(kpi, kpj, K, cv2.USAC_MAGSAC, .999, 1)
+                        E, _ = cv2.findEssentialMat(kpi, kpj, K, cv2.USAC_MAGSAC, .999, 1.0)
                         points, R1, t1, mask = cv2.recoverPose(E, kpi, kpj, K)
                         rvec, _ = cv2.Rodrigues(R1) # rot mat to rot vec
                         
@@ -97,7 +97,7 @@ class Rec:
         p3d = cv2.convertPointsFromHomogeneous(p4d_hom.T)
 
         for i in range(kpi.shape[1]):
-            src_2dpt_idx = {im_idx1:kpi_idx[i], im_idx2:kpi_idx[i]} # idx -> idx for 2d
+            src_2dpt_idx = {im_idx1:kpi_idx[i], im_idx2:kpj_idx[i]} # idx -> idx for 2d
             pt = Point3D_with_views(p3d[i], src_2dpt_idx)
             p3d_with_views.append(pt)
 
@@ -148,7 +148,10 @@ class Rec:
 
 
     def get_idx_in_corr_order(idx1, idx2):
+        # if idx1 < idx2: return idx1, idx2
+        # else: return idx2, idx1
         return min(idx1,idx2), max(idx1,idx2)
+
 
 
     def adj_imgs(i, j, adj):
@@ -174,7 +177,7 @@ class Rec:
     
 
 
-    def nxt_img_pair_to_grow_recon(n, init_pair, res_img, unres_img, adj):
+    def nxt_img_pair_to_grow_recon(n, init_pair, res_img, unres_img, adj, inc=0):
         # extend rec. in both direction (resfect imgs b/w init)
         if len(unres_img) == 0: raise ValueError("Already Resected")
         
@@ -182,9 +185,10 @@ class Rec:
 
         if (init_pair[1] - init_pair[0] > n/2): # init pair straddles 'end' points (ie. (0, n-1) for n imgs)
             straddle = True
+            
 
         init_arc = init_pair[1] - init_pair[0] + 1
-
+        
         if len(res_img) < init_arc:
             if straddle == False:
                 i = res_img[-2] + 1
@@ -199,22 +203,34 @@ class Rec:
                     return res_idx, unres_idx, prepend
                 i = (i + 1) % n
 
-        extensions = len(res_img) - init_arc
+        extensions = len(res_img) - init_arc + inc
         if straddle == True:
-            if extensions % 2 == 0:
+            if (extensions) % 2 == 0:
                 unres_idx = (init_pair[0] + int(extensions/2) + 1) % n
                 res_idx = (unres_idx - 1) % n
             else:
-                unres_idx = (init_pair[1] + int(extensions/2) - 1) % n
+                unres_idx = (init_pair[1] - int(extensions/2) - 1) % n
                 res_idx = (unres_idx + 1) % n
         else:
-            if extensions % 2 == 0:
+            if (extensions) % 2 == 0:
                 unres_idx = (init_pair[1] + int(extensions/2) + 1) % n
                 res_idx = (unres_idx - 1) % n
             else:
-                unres_idx = (init_pair[0] + int(extensions/2) - 1) % n
+                unres_idx = (init_pair[0] - int(extensions/2) - 1) % n
                 res_idx = (unres_idx + 1) % n
         
+        if adj[min(res_idx, unres_idx), max(res_idx, unres_idx)] == 0:
+            possible = []
+            for i in res_img:
+                if adj[i, unres_idx]:
+                    possible.append(i)
+                if adj[unres_idx, i]:
+                    possible.append(i)
+            
+            res_idx = random.choice(possible)
+
+
+
         prepend = False
         return res_idx, unres_idx, prepend
         
@@ -241,7 +257,6 @@ class Rec:
     def get_corr_for_pnp(res_idx, unres_idx, pts3d, matches, kp):
         # for Perspective n Point problem
         idx1, idx2 = Rec.get_idx_in_corr_order(res_idx, unres_idx)
-
         triangulation_status = np.ones(len(matches[(idx1, idx2)])) # if status[x] = 1 -> matches[x] used for triangulation
         p3d_for_pnp = []
         p2d_for_pnp = []
@@ -249,7 +264,6 @@ class Rec:
         for p3d in pts3d:
             if res_idx not in p3d.src_2dpt_idx:
                 continue
-            
             res_kpt_idx = p3d.src_2dpt_idx[res_idx]
             for k in range(len(matches[(idx1, idx2)])):
                 unres_kpt_idx, success = Rec.check_and_get_unres_pt(res_kpt_idx, matches[(idx1, idx2)][k], res_idx, unres_idx)
@@ -271,7 +285,7 @@ class Rec:
 
         p3d_for_pnp = np.squeeze(np.array(p3d_for_pnp))
         p2d_for_pnp = np.expand_dims(
-            np.squeeze(np.array(p2d_for_pnp), axis=1)
+            np.squeeze(np.array(p2d_for_pnp)), axis=1
         )
 
         n = len(p3d_for_pnp)
@@ -367,18 +381,18 @@ class Rec:
         avg_err = a/(2*len(err))
         perc_inliers = np.mean(inliers)
 
-        return err, proj_pts, perc_inliers
+        return err, proj_pts, avg_err, perc_inliers
         
 
 
 class BA:
     def ba_sparsity(n_cam, n_pts, cam_ind, pt_ind):
         # 12 cam params (ext + int); 3 3D pt params
-        m = cam_ind * 2
+        m = cam_ind.size * 2
         n = n_cam * 12 + n_pts * 3
 
-        A = lil_matrix((m,n), dtype=np.int64)
-
+        # A = lil_matrix((m,n), dtype=int)
+        A = lil_matrix((m, n), dtype=int)
 
         i = np.arange(cam_ind.size)
         
@@ -404,6 +418,7 @@ class BA:
             p = pts[i]
             p = np.expand_dims(p, axis=0)
             p, _ = cv2.projectPoints(p, rvec, t, K, distCoeffs=np.array([]))
+            p = np.squeeze(np.array(p))
 
             pt_proj.append(p)
 
