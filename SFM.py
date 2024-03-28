@@ -3,10 +3,8 @@ import cv2
 import scipy
 from skimage.measure import ransac
 import time, os, shutil, platform
-import progressbar
 from tqdm import tqdm
 from collections import defaultdict
-import sfm_helpers
 
 class SFM:
     def __init__(self, src, K=None):
@@ -193,7 +191,7 @@ class SFM:
             raise AssertionError("Error: Camera matrix K not defined")
         
         # initial rec
-        best_pair = sfm_helpers.Rec.best_pair(self.adj, self.good, self.kp, self.K)
+        # best_pair = sfm_helpers.Rec.best_pair(self.adj, self.good, self.kp, self.K)
         
 
     def output_match(self):
