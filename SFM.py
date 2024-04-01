@@ -85,7 +85,7 @@ class SFM:
         # print(f"ELAPSED TIME:\n{end-start}")
 
     def ft_match(self, mmc=15):
-        # LO-RANSAC
+        # MAGSAC
         print("\nMATCHING...\n")
         self.matches = {}
         self.src_pts = {}
@@ -178,10 +178,12 @@ class SFM:
         
         for i in range(self.n-1):
             for j in range(i, self.n):
-                if len(matches[(i, j)]) > 0:
+                sz = len(matches[(i, j)])
+                if sz > 0:
                     n_pairs += 1
                     pairs.append((i,j))
-                    self.adj[i][j] = 1
+                    # self.adj[i][j] = 1
+                    self.adj[i][j] = sz
 
         return self.adj, pairs
 
