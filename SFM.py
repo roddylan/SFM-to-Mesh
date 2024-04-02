@@ -70,6 +70,9 @@ class SFM:
             
             kp = self.detector.detect(im)
             desc = self.descriptor.compute(im, kp)
+            
+            # Added for visuals
+            frame = cv2.drawKeypoints(im, kp, None)
 
             # kp, desc = self.brisk.detectAndCompute(im, None)
             # kp, desc = self.descriptor.detectAndCompute(im, None)
@@ -77,6 +80,9 @@ class SFM:
             self.kp.append(kp)
             self.desc.append(desc)
             i += 1
+            
+            cv2.imshow("f", frame)
+            k = cv2.waitKey(30)
         
         end = time.time()
         # print(f"KEYPOINTS:\n{self.kp}\n")
