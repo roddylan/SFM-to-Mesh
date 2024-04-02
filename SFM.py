@@ -84,6 +84,7 @@ class SFM:
             cv2.imshow("f", frame)
             k = cv2.waitKey(30)
         
+        cv2.destroyAllWindows()
         end = time.time()
         # print(f"KEYPOINTS:\n{self.kp}\n")
         # print(f"DESCRIPTORS:\n{self.desc}")

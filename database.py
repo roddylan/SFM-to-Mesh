@@ -82,6 +82,8 @@ CREATE_ALL = "; ".join(
     ]
 )
 
+VIEW_KEYPOINTS = """SELECT * FROM keypoints;"""
+
 
 def image_ids_to_pair_id(image_id1, image_id2):
     if image_id1 > image_id2:
