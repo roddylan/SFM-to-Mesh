@@ -313,8 +313,13 @@ class SFM:
 
         self.db.commit()
 
-    def reconstruction(self, dest, obj_name='object'):
-        print("\n\nRECONSTUCTION....")
+    def reconstruction_sparse(self, dest, obj_name='object'):
+        print("\n\nSPARSE RECONSTUCTION....")
+        try:
+            os.mkdir(dest)
+        except:
+            shutil.rmtree(dest)
+            os.mkdir(dest)
         self.__add_data()
         maps = pycolmap.incremental_mapping(self.db_path, self.src, dest)
         for key in maps:
@@ -334,10 +339,22 @@ class SFM:
             merged_file = np.concatenate(files, -1)
             merged_el = plyfile.PlyElement.describe(merged_file, "vertex")
             plyfile.PlyData([merged_el]).write(f'{dest}/{obj_name}_merged.ply')
-
-
-
-
+        
+    def reconstruction_dense(self, dest, obj_name='object', model_folder='/0'):
+            print("\n\nDENSE RECONSTRUCTION")
+            mvs = f'{dest}/mvs'
+            dest += model_folder
+            try:
+                os.mkdir(mvs)
+            except:
+                shutil.rmtree(mvs)
+                os.mkdir(mvs)
+            try:
+                pycolmap.undistort_images(mvs, dest, self.src)
+                pycolmap.patch_match_stereo(mvs)
+                pycolmap.stereo_fusion(f'{dest}/{obj_name}_dense.ply', mvs)
+            except AttributeError as e:
+                print("PYCOLMAP NEEDS A CUDA BUILD")
 
     def bundle_adjustment(self):
         if self.K is None:
@@ -360,4 +377,5 @@ if __name__ == "__main__":
     kp, desc = test1.ft_extract()
     matches = test1.ft_match()
 
-    test1.reconstruction('colmap_test_out')
+    test1.reconstruction_sparse('colmap_test_out')
+    test1.reconstruction_dense('colmap_test_out', model_folder='/1')
