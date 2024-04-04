@@ -1,6 +1,6 @@
 # adapted from https://github.com/colmap/colmap/blob/main/scripts/python/database.py
 
-import sys
+import os
 import numpy as np
 import sqlite3
 
@@ -81,9 +81,6 @@ CREATE_ALL = "; ".join(
         CREATE_NAME_INDEX,
     ]
 )
-
-VIEW_KEYPOINTS = """SELECT * FROM keypoints;"""
-
 
 def image_ids_to_pair_id(image_id1, image_id2):
     if image_id1 > image_id2:
