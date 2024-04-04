@@ -98,7 +98,7 @@ def pair_id_to_image_ids(pair_id):
 
 
 def array_to_blob(array):
-    return array.tostring()
+    return array.tobytes()
 
 
 def blob_to_array(blob, dtype, shape=(-1,)):
