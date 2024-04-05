@@ -187,8 +187,8 @@ class SFM:
         return self.adj, pairs
     
     def get_camera_info(self):
-        files = os.listdir(self.src)
-        for file in files:
+        for key in self.itoimg:
+            file = self.itoimg[key]
             ext = os.path.splitext(file)[-1].lower()
             if ext in ['.jpg', '.png']:
                 camera = pycolmap.infer_camera_from_image(f'{self.src}/{file}')
@@ -274,7 +274,8 @@ class SFM:
         self.cam_obj = pycolmap.Camera(camera_id=1, model=cam_model_value, width=img_w, height=img_h, params=cam_params)
         
         # adding images
-        for file in os.listdir(self.src):
+        for key in self.itoimg:
+            file = self.itoimg[key]
             ext = os.path.splitext(file)[-1].lower()
             if ext in ['.jpg', '.png']:
                 self.db.add_image(file, self.cam_id)
@@ -354,7 +355,7 @@ class SFM:
                 pycolmap.patch_match_stereo(mvs)
                 pycolmap.stereo_fusion(f'{dest}/{obj_name}_dense.ply', mvs)
             except AttributeError as e:
-                print("PYCOLMAP NEEDS A CUDA BUILD")
+                print("PYCOLMAP NEEDS A CUDA BUILD, PLEASE USE THE COLMAP GUI FOR DENSE RECONSTRUCTION.")
 
     def bundle_adjustment(self):
         if self.K is None:
