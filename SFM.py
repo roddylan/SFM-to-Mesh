@@ -188,11 +188,8 @@ class SFM:
     
     def get_camera_info(self):
         for key in self.itoimg:
-            file = self.itoimg[key]
-            ext = os.path.splitext(file)[-1].lower()
-            if ext in ['.jpg', '.png']:
-                camera = pycolmap.infer_camera_from_image(f'{self.src}/{file}')
-                break
+            camera = pycolmap.infer_camera_from_image(f'{self.src}/{self.itoimg[key]}')
+            break
         return camera.model.name, camera.model.value, camera.width, camera.height, camera.params
 
     def output_match(self):
@@ -275,10 +272,7 @@ class SFM:
         
         # adding images
         for key in self.itoimg:
-            file = self.itoimg[key]
-            ext = os.path.splitext(file)[-1].lower()
-            if ext in ['.jpg', '.png']:
-                self.db.add_image(file, self.cam_id)
+            self.db.add_image(self.itoimg[key], self.cam_id)
 
         self.db.commit()
 
