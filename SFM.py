@@ -2,22 +2,24 @@ import numpy as np
 import cv2
 import scipy
 from skimage.measure import ransac
-import time, os, shutil, platform
+import time, os, shutil, platform, glob
 from tqdm import tqdm
 from collections import defaultdict
+import database
+import pycolmap, plyfile
 
 class SFM:
-    def __init__(self, src, K=None):
+    def __init__(self, src, db_path='database.db', K=None):
         self.K = K
         self.src = src
         self.get_imgs(src)
+        
+        self.db_path = db_path
         
         # self.brisk = cv2.BRISK_create() # TODO: maybe just use BRISK - BRISK
 
         self.detector = cv2.BRISK_create()
         self.descriptor = cv2.SIFT_create()
-
-        
 
     def pre_proc_img(self):
         # create bbox + get rid of radial distortion
@@ -70,14 +72,13 @@ class SFM:
             
             kp = self.detector.detect(im)
             desc = self.descriptor.compute(im, kp)
-
+            
             # kp, desc = self.brisk.detectAndCompute(im, None)
             # kp, desc = self.descriptor.detectAndCompute(im, None)
 
             self.kp.append(kp)
             self.desc.append(desc)
             i += 1
-        
         end = time.time()
         # print(f"KEYPOINTS:\n{self.kp}\n")
         # print(f"DESCRIPTORS:\n{self.desc}")
@@ -167,7 +168,7 @@ class SFM:
         
         self.matches = self.good
         return self.good
-
+    
     def adj_list(self, matches=None):
         if not matches:
             matches = self.good
@@ -186,15 +187,12 @@ class SFM:
                     self.adj[i][j] = sz
 
         return self.adj, pairs
-
     
-    def reconstruction(self):
-        if self.K is None:
-            raise AssertionError("Error: Camera matrix K not defined")
-        
-        # initial rec
-        # best_pair = sfm_helpers.Rec.best_pair(self.adj, self.good, self.kp, self.K)
-        
+    def get_camera_info(self):
+        for key in self.itoimg:
+            camera = pycolmap.infer_camera_from_image(f'{self.src}/{self.itoimg[key]}')
+            break
+        return camera.model.name, camera.model.value, camera.width, camera.height, camera.params
 
     def output_match(self):
         if platform.system() == "Windows":
@@ -261,6 +259,99 @@ class SFM:
         
         self.output_match()
 
+    def __add_data(self):
+        if os.path.exists(self.db_path):
+            print("Removing existing db")
+            os.remove(self.db_path)
+        self.db = database.COLMAPDatabase.connect(self.db_path)
+        self.db.create_tables()
+
+        # adding camera info for pycolmap
+        cam_model, cam_model_value, img_w, img_h, cam_params = self.get_camera_info()
+        
+        self.cam_id = self.db.add_camera(cam_model_value, img_w, img_h, cam_params)
+        self.cam_obj = pycolmap.Camera(camera_id=1, model=cam_model_value, width=img_w, height=img_h, params=cam_params)
+        
+        # adding images
+        for key in self.itoimg:
+            self.db.add_image(self.itoimg[key], self.cam_id)
+
+        self.db.commit()
+
+        # adding keypoints and descriptors to db
+        kps_per_frame = [np.array([[y.pt[0], y.pt[1], y.size, y.angle] for y in x[0]], dtype=np.float32) for x in self.desc]
+        desc_per_frame = [x[1] for x in self.desc]
+
+        for i, frame_kps in enumerate(kps_per_frame):
+            self.db.add_keypoints(i+1, frame_kps)
+
+        for i, frame_desc in enumerate(desc_per_frame):
+            self.db.add_descriptors(i+1, frame_desc)
+
+        self.db.commit()
+
+        # adding matches and two view geo to db
+        kps_2d = [np.array([[y.pt[0], y.pt[1]] for y in x[0]], dtype=np.float64) for x in self.desc]
+
+        for i in self.good.keys():
+            if isinstance(i, tuple):
+                m = np.array([[x.queryIdx,x.trainIdx] for x in self.good[i]], dtype=np.uint32)
+                if len(m) > 0:
+                    self.db.add_matches(i[0]+1, i[1]+1, m)
+                    t_geo = pycolmap.estimate_calibrated_two_view_geometry(self.cam_obj, kps_2d[i[0]], self.cam_obj, kps_2d[i[1]], m).todict()
+                    self.db.add_two_view_geometry(
+                        image_id1 = i[0]+1, 
+                        image_id2 = i[1]+1, 
+                        matches = t_geo['inlier_matches'], 
+                        F = t_geo['F'], 
+                        E = t_geo['E'],
+                        H = t_geo['H'],
+                        config = t_geo['config'])
+
+        self.db.commit()
+
+    def reconstruction_sparse(self, dest, obj_name='object'):
+        print("\n\nSPARSE RECONSTUCTION....")
+        try:
+            os.mkdir(dest)
+        except:
+            shutil.rmtree(dest)
+            os.mkdir(dest)
+        self.__add_data()
+        maps = pycolmap.incremental_mapping(self.db_path, self.src, dest)
+        for key in maps:
+            maps[key].export_PLY(f'{dest}/{obj_name}_{key}.ply')
+        
+        if len(maps) > 1:
+            print("MERGING PLY FILES")
+            files = []
+            for file_name in os.listdir(dest):
+                if len(file_name) < 4 or os.path.splitext(file_name)[-1].lower() != '.ply':
+                    continue
+
+                file = plyfile.PlyData.read(os.path.join(dest, file_name))
+                for element in file.elements:
+                    files.append(element.data)
+            
+            merged_file = np.concatenate(files, -1)
+            merged_el = plyfile.PlyElement.describe(merged_file, "vertex")
+            plyfile.PlyData([merged_el]).write(f'{dest}/{obj_name}_merged.ply')
+        
+    def reconstruction_dense(self, dest, obj_name='object', model_folder='/0'):
+            print("\n\nDENSE RECONSTRUCTION")
+            mvs = f'{dest}/mvs'
+            dest += model_folder
+            try:
+                os.mkdir(mvs)
+            except:
+                shutil.rmtree(mvs)
+                os.mkdir(mvs)
+            try:
+                pycolmap.undistort_images(mvs, dest, self.src)
+                pycolmap.patch_match_stereo(mvs)
+                pycolmap.stereo_fusion(f'{dest}/{obj_name}_dense.ply', mvs)
+            except AttributeError as e:
+                print("PYCOLMAP NEEDS A CUDA BUILD, PLEASE USE THE COLMAP GUI FOR DENSE RECONSTRUCTION.")
 
     def bundle_adjustment(self):
         if self.K is None:
@@ -278,6 +369,10 @@ class SFM:
 
 
 if __name__ == "__main__":
-    test1 = SFM(src="test1/imgs")
+    test1 = SFM(src="datasets/templeRing")
 
     kp, desc = test1.ft_extract()
+    matches = test1.ft_match()
+
+    test1.reconstruction_sparse('colmap_test_out')
+    test1.reconstruction_dense('colmap_test_out', model_folder='/1')
