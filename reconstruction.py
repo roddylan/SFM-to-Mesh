@@ -31,10 +31,21 @@ class Reconstruction:
 
 
 
-    def poisson(self, depth):
-        pass
+    def poisson(self, depth, width, scale, l_fit):
+        # estimates normals
+        
+        return o3d.geometry.TriangleMesh.create_from_point_cloud_poisson(
+            self.init_poly,
+            depth=depth,
+            width=width,
+            scale=scale,
+            linear_fit=l_fit
+        )[0]
 
-    def bpa(self, radius, ):
+        
+
+    def bpa(self, radii: list, ):
+        # assumes normals in poly
         pass
 
     def alpha(self):
