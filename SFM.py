@@ -85,7 +85,7 @@ class SFM:
         return self.kp, self.desc
         # print(f"ELAPSED TIME:\n{end-start}")
 
-    def ft_match(self, mmc=15):
+    def ft_match(self, mmc=20):
         # MAGSAC
         print("\nMATCHING...\n")
         self.matches = {}
@@ -100,7 +100,9 @@ class SFM:
         
         norm = cv2.NORM_HAMMING
         N = self.n
-        MIN_MATCH_COUNT = min(15, mmc)
+        # MIN_MATCH_COUNT = min(15, mmc)
+        # MIN_MATCH_COUNT = max(15, mmc)
+        MIN_MATCH_COUNT = mmc
         
         # https://docs.opencv.org/3.4/d1/de0/tutorial_py_feature_homography.html
         # TODO: change hyper params
@@ -135,7 +137,7 @@ class SFM:
                         # TODO: change hyper params
                         # F, mask = cv2.findFundamentalMat(src_pts, dst_pts, cv2.USAC_MAGSAC, ransacReprojThreshold=4.5)
                         # F, mask = cv2.findFundamentalMat(src_pts, dst_pts, cv2.USAC_MAGSAC, ransacReprojThreshold=3.0)
-                        F, mask = cv2.findFundamentalMat(src_pts, dst_pts, cv2.USAC_MAGSAC, 3.0)
+                        F, mask = cv2.findFundamentalMat(src_pts, dst_pts, cv2.USAC_MAGSAC, ransacReprojThreshold=4.5)
                         # # self.M[(i,j)] = M
                         self.F[(i,j)] = F
                         self.mask[(i,j)] = mask
