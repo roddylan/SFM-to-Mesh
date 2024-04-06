@@ -341,11 +341,11 @@ class SFM:
         print("\n\nDENSE RECONSTRUCTION")
         mvs = f'{dest}/mvs'
         dest += model_folder
-        try:
-            os.mkdir(dest)
-        except:
-            shutil.rmtree(dest)
-            os.mkdir(dest)
+        # try:
+        #     os.mkdir(dest)
+        # except:
+        #     shutil.rmtree(dest)
+        #     os.mkdir(dest)
         try:
             os.mkdir(mvs)
         except:
@@ -356,7 +356,7 @@ class SFM:
             pycolmap.patch_match_stereo(mvs)
             pycolmap.stereo_fusion(f'{dest}/{obj_name}_dense.ply', mvs)
         except AttributeError as e:
-            print("PYCOLMAP NEEDS A CUDA BUILD, PLEASE USE THE COLMAP GUI FOR DENSE RECONSTRUCTION.")
+            print("PYCOLMAP NEEDS A CUDA BUILD, PLEASE USE THE COLMAP GUI FOR DENSE RECONSTRUCTION OR BIND FROM SOURCE.")
 
     def bundle_adjustment(self):
         if self.K is None:
@@ -380,4 +380,4 @@ if __name__ == "__main__":
     matches = test1.ft_match()
 
     test1.reconstruction_sparse('colmap_test_out')
-    test1.reconstruction_dense('colmap_test_out')
+    test1.reconstruction_dense('colmap_test_out', model_folder='/1')
