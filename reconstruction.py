@@ -8,12 +8,19 @@ import open3d as o3d
 class Reconstruction:
     def __init__(self, poly_src):
         self.src = poly_src
-        self.init_poly = o3d.io.read_point_cloud(self.src)
+        self.init_pcd = o3d.io.read_point_cloud(self.src)
+        self.pcd = self.init_pcd
+        self.mesh = None
         
+    def reset_pcd(self, pcd):
+        self.pcd = self.init_pcd
+
+    def set_pcd(self, pcd):
+        self.pcd = pcd
 
     def preproc(self, type="stat", down_sample=False, pcd=None, **kwargs):
         if pcd is None:
-            pcd = self.init_poly
+            pcd = self.init_pcd
         opcd = pcd
         
         if down_sample:
@@ -67,32 +74,44 @@ class Reconstruction:
             ind = None
         
         pcd = pcd.select_by_index(ind)
+        self.pcd = pcd
         return pcd, ind, opcd
         
 
 
 
-    def poisson(self, depth=8, width=0, scale=1, l_fit=False):
-        # estimates normals
-        
-        return o3d.geometry.TriangleMesh.create_from_point_cloud_poisson(
-            self.init_poly,
+    def poisson(self, depth=8, width=0, scale=1.25, l_fit=False, pcd=None):
+        # assumes normals in poly
+        if pcd is None:
+            pcd = self.pcd
+
+        self.mesh = o3d.geometry.TriangleMesh.create_from_point_cloud_poisson(
+            pcd,
             depth=depth,
             width=width,
             scale=scale,
             linear_fit=l_fit
         )[0]
 
+        return self.mesh
+
         
 
-    def bpa(self, radii: list, **kwargs):
+    def bpa(self, radii: list, pcd,):
         # assumes normals in poly
         pass
 
     def alpha(self):
         pass
 
-    def create(self, out=None):
+    def create(self, mesh=None, out=None):
+        if mesh == None:
+            mesh = self.mesh
+
+        if mesh == None:
+            print("No mesh provided")
+            return
+        
         if out != None:
             # create ply file
             return
@@ -101,8 +120,8 @@ class Reconstruction:
     
     def show_pcd(self, pcd=None, name="", show_norm=False):
         if pcd is None:
-            print("Showing initial point cloud (default)")
-            pcd = [self.init_poly]
+            print("Showing self.pcd point cloud (default)")
+            pcd = [self.pcd]
         
         if type(pcd) is not list:
             pcd = [pcd]
