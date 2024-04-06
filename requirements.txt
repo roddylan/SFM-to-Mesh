@@ -13,3 +13,5 @@ matplotlib
 pyntcloud
 pycolmap
 sqlite3
+ultralytics
+plyfile
