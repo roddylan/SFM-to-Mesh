@@ -342,6 +342,11 @@ class SFM:
             mvs = f'{dest}/mvs'
             dest += model_folder
             try:
+                os.mkdir(dest)
+            except:
+                shutil.rmtree(dest)
+                os.mkdir(dest)
+            try:
                 os.mkdir(mvs)
             except:
                 shutil.rmtree(mvs)
