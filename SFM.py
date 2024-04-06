@@ -380,4 +380,4 @@ if __name__ == "__main__":
     matches = test1.ft_match()
 
     test1.reconstruction_sparse('colmap_test_out')
-    test1.reconstruction_dense('colmap_test_out', model_folder='/1')
+    test1.reconstruction_dense('colmap_test_out')
