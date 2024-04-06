@@ -338,25 +338,25 @@ class SFM:
             plyfile.PlyData([merged_el]).write(f'{dest}/{obj_name}_merged.ply')
         
     def reconstruction_dense(self, dest, obj_name='object', model_folder='/0'):
-            print("\n\nDENSE RECONSTRUCTION")
-            mvs = f'{dest}/mvs'
-            dest += model_folder
-            try:
-                os.mkdir(dest)
-            except:
-                shutil.rmtree(dest)
-                os.mkdir(dest)
-            try:
-                os.mkdir(mvs)
-            except:
-                shutil.rmtree(mvs)
-                os.mkdir(mvs)
-            try:
-                pycolmap.undistort_images(mvs, dest, self.src)
-                pycolmap.patch_match_stereo(mvs)
-                pycolmap.stereo_fusion(f'{dest}/{obj_name}_dense.ply', mvs)
-            except AttributeError as e:
-                print("PYCOLMAP NEEDS A CUDA BUILD, PLEASE USE THE COLMAP GUI FOR DENSE RECONSTRUCTION.")
+        print("\n\nDENSE RECONSTRUCTION")
+        mvs = f'{dest}/mvs'
+        dest += model_folder
+        try:
+            os.mkdir(dest)
+        except:
+            shutil.rmtree(dest)
+            os.mkdir(dest)
+        try:
+            os.mkdir(mvs)
+        except:
+            shutil.rmtree(mvs)
+            os.mkdir(mvs)
+        try:
+            pycolmap.undistort_images(mvs, dest, self.src)
+            pycolmap.patch_match_stereo(mvs)
+            pycolmap.stereo_fusion(f'{dest}/{obj_name}_dense.ply', mvs)
+        except AttributeError as e:
+            print("PYCOLMAP NEEDS A CUDA BUILD, PLEASE USE THE COLMAP GUI FOR DENSE RECONSTRUCTION.")
 
     def bundle_adjustment(self):
         if self.K is None:
