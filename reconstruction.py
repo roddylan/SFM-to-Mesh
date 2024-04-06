@@ -29,13 +29,37 @@ class Reconstruction:
         if type == "stat":
             # n_neigh = 5
             # std_ratio = 0.25
-            n_neigh, std_ratio = kwargs["n_neigh"], kwargs["std_ratio"]
+            # n_neigh, std_ratio = kwargs["n_neigh"], kwargs["std_ratio"]
+            try:
+                n_neigh = kwargs["n_neigh"]
+            except:
+                print("'n_neigh' argument not provided, using default value 5")
+                n_neigh = 5
+
+            try:
+                std_ratio = kwargs["std_ratio"]
+            except:
+                print("'std_ratio' argument not provided, using default value 0.25")
+                std_ratio = 0.25
+            
             _, ind = pcd.remove_statistical_outlier(n_neigh, std_ratio, False)
 
         elif type == "rad":
             # n_pts = 12
             # rad = .15
-            n_pts, rad = kwargs["n_pts"], kwargs["rad"]
+            # n_pts, rad = kwargs["n_pts"], kwargs["rad"]
+            try:
+                n_pts = kwargs["n_pts"]
+            except:
+                print("'n_pts' argument not provided, using default value 12")
+                n_pts = 12
+
+            try:
+                rad = kwargs["rad"]
+            except:
+                print("'rad' argument not provided, using default value 0.15")
+                rad = .15
+
             _, ind = pcd.remove_radius_outlier(n_pts, rad)
 
         else:
@@ -48,7 +72,7 @@ class Reconstruction:
 
 
 
-    def poisson(self, depth, width, scale, l_fit):
+    def poisson(self, depth=8, width=0, scale=1, l_fit=False):
         # estimates normals
         
         return o3d.geometry.TriangleMesh.create_from_point_cloud_poisson(
@@ -61,7 +85,7 @@ class Reconstruction:
 
         
 
-    def bpa(self, radii: list, ):
+    def bpa(self, radii: list, **kwargs):
         # assumes normals in poly
         pass
 
@@ -74,3 +98,13 @@ class Reconstruction:
             return
         # display ply 
         return
+    
+    def show_pcd(self, pcd=None, name="", show_norm=False):
+        if pcd is None:
+            print("Showing initial point cloud (default)")
+            pcd = [self.init_poly]
+        
+        if type(pcd) is not list:
+            pcd = [pcd]
+        
+        o3d.visualization.draw_geometries(pcd, window_name=name, point_show_normal=show_norm)
