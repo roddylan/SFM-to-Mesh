@@ -85,7 +85,7 @@ class SFM:
         return self.kp, self.desc
         # print(f"ELAPSED TIME:\n{end-start}")
 
-    def ft_match(self, mmc=20):
+    def ft_match(self, mmc=12):
         # MAGSAC
         print("\nMATCHING...\n")
         self.matches = {}
@@ -137,7 +137,8 @@ class SFM:
                         # TODO: change hyper params
                         # F, mask = cv2.findFundamentalMat(src_pts, dst_pts, cv2.USAC_MAGSAC, ransacReprojThreshold=4.5)
                         # F, mask = cv2.findFundamentalMat(src_pts, dst_pts, cv2.USAC_MAGSAC, ransacReprojThreshold=3.0)
-                        F, mask = cv2.findFundamentalMat(src_pts, dst_pts, cv2.USAC_MAGSAC, ransacReprojThreshold=4.5)
+                        # F, mask = cv2.findFundamentalMat(src_pts, dst_pts, cv2.USAC_MAGSAC, ransacReprojThreshold=4.5)
+                        F, mask = cv2.findFundamentalMat(src_pts, dst_pts, cv2.USAC_MAGSAC, ransacReprojThreshold=5.0)
                         # # self.M[(i,j)] = M
                         self.F[(i,j)] = F
                         self.mask[(i,j)] = mask
