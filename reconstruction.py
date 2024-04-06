@@ -105,14 +105,14 @@ class Reconstruction:
         pass
 
     def create(self, mesh=None, out=None):
-        if mesh == None:
+        if mesh is None:
             mesh = self.mesh
 
-        if mesh == None:
+        if mesh is None:
             print("No mesh provided")
             return
         
-        if out != None:
+        if out is not None and out != "":
             # create ply file
             return
         # display ply 
