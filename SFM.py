@@ -85,7 +85,7 @@ class SFM:
         return self.kp, self.desc
         # print(f"ELAPSED TIME:\n{end-start}")
 
-    def ft_match(self, mmc=15):
+    def ft_match(self, mmc=12):
         # MAGSAC
         print("\nMATCHING...\n")
         self.matches = {}
@@ -100,7 +100,9 @@ class SFM:
         
         norm = cv2.NORM_HAMMING
         N = self.n
-        MIN_MATCH_COUNT = min(15, mmc)
+        # MIN_MATCH_COUNT = min(15, mmc)
+        # MIN_MATCH_COUNT = max(15, mmc)
+        MIN_MATCH_COUNT = mmc
         
         # https://docs.opencv.org/3.4/d1/de0/tutorial_py_feature_homography.html
         # TODO: change hyper params
@@ -135,7 +137,10 @@ class SFM:
                         # TODO: change hyper params
                         # F, mask = cv2.findFundamentalMat(src_pts, dst_pts, cv2.USAC_MAGSAC, ransacReprojThreshold=4.5)
                         # F, mask = cv2.findFundamentalMat(src_pts, dst_pts, cv2.USAC_MAGSAC, ransacReprojThreshold=3.0)
-                        F, mask = cv2.findFundamentalMat(src_pts, dst_pts, cv2.USAC_MAGSAC, 3.0)
+                        # F, mask = cv2.findFundamentalMat(src_pts, dst_pts, cv2.USAC_MAGSAC, ransacReprojThreshold=4.5)
+                        # F, mask = cv2.findFundamentalMat(src_pts, dst_pts, cv2.USAC_MAGSAC, ransacReprojThreshold=5.0)
+                        F, mask = cv2.findFundamentalMat(src_pts, dst_pts, cv2.USAC_MAGSAC, ransacReprojThreshold=3.5)
+                        # F, mask = cv2.findFundamentalMat(src_pts, dst_pts, cv2.USAC_DEFAULT, ransacReprojThreshold=3.5)
                         # # self.M[(i,j)] = M
                         self.F[(i,j)] = F
                         self.mask[(i,j)] = mask
@@ -338,20 +343,25 @@ class SFM:
             plyfile.PlyData([merged_el]).write(f'{dest}/{obj_name}_merged.ply')
         
     def reconstruction_dense(self, dest, obj_name='object', model_folder='/0'):
-            print("\n\nDENSE RECONSTRUCTION")
-            mvs = f'{dest}/mvs'
-            dest += model_folder
-            try:
-                os.mkdir(mvs)
-            except:
-                shutil.rmtree(mvs)
-                os.mkdir(mvs)
-            try:
-                pycolmap.undistort_images(mvs, dest, self.src)
-                pycolmap.patch_match_stereo(mvs)
-                pycolmap.stereo_fusion(f'{dest}/{obj_name}_dense.ply', mvs)
-            except AttributeError as e:
-                print("PYCOLMAP NEEDS A CUDA BUILD, PLEASE USE THE COLMAP GUI FOR DENSE RECONSTRUCTION.")
+        print("\n\nDENSE RECONSTRUCTION")
+        mvs = f'{dest}/mvs'
+        dest += model_folder
+        # try:
+        #     os.mkdir(dest)
+        # except:
+        #     shutil.rmtree(dest)
+        #     os.mkdir(dest)
+        try:
+            os.mkdir(mvs)
+        except:
+            shutil.rmtree(mvs)
+            os.mkdir(mvs)
+        try:
+            pycolmap.undistort_images(mvs, dest, self.src)
+            pycolmap.patch_match_stereo(mvs)
+            pycolmap.stereo_fusion(f'{dest}/{obj_name}_dense.ply', mvs)
+        except AttributeError as e:
+            print("PYCOLMAP NEEDS A CUDA BUILD, PLEASE USE THE COLMAP GUI FOR DENSE RECONSTRUCTION OR BIND FROM SOURCE.")
 
     def bundle_adjustment(self):
         if self.K is None:

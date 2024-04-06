@@ -1,14 +1,0 @@
-ply
-format binary_little_endian 1.0
-element vertex 40
-property float x
-property float y
-property float z
-property uchar red
-property uchar green
-property uchar blue
-end_header
-Lzy@ñŒeÀab‘B¤€Q¤
-4Áã{â¿§vB“uKÎ!Á”~¶¿>>’B«ˆ`åqAÁj¿/zB …eAõ@GHU?‘•ŠBR45Á„¾?9çBŽl;NFÁÖò?<c‚Bªo±ì9ÁS@Ò}‚BxX3D’ý@Ôf.@ÿ*“B°ŠYùnò@ÜhI@ê”B¦PõÁAõáJ@çá”BP3(Axþ]@:_B«…O4·@Á%ƒ@AÒ†BØ¶{Ð÷8AILŽ@©d…BbL1I#
-A¶}²@Øc–BÄ¥umoA»Âå@øð›BaB³D7AŽ(ò@™ˆ™BÂžeQ-AÑÙAòfœBL/{ZAÜ2!Aµì“B•}]…33ÁÜ}À¸ŸB_6Ô­AÁ>'¿1ŸzB …dþš8Á˜¾¾ÇôzBxV1ŽKEÁˆ*@³‚B©ŒfÛm9ÁP‘C@L‹ByH ï@§bM@Ýä”B²ˆLÀ¹/AÏ‡@m‘BcBfÖA²†Ð@Qu˜B¨Šd‘PA£XAu|BŒvTW1@Õp‰Àzå‘B‘rKßò@9QÀýü’B`N8^ÀæQ	À_‚œB‹i9j<BÁG.¿ ©{B †d`zÁ®g&¾a„•ByOMûÁÉ1E?Yu—B˜xMoyÁ½¾(˜B‘nC¥´@Á#þAá“B•o=iìeÁcÐXAr§“BìÐ–8Z×À
-$Ð¿8m›B.%!¨ÂAïÞç@½Ä‘BÈ£mƒÙ/AiA—‰žB¦‚J
