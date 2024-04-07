@@ -156,6 +156,7 @@ class SFM:
                 # print(f"{(i,j)}\n")
                 pbar.set_description(f"{(i,j)}")
                 self.matches[(i,j)] = flann.knnMatch(self.desc[i][1], self.desc[j][1], 2)
+                
                 # self.matches[(i,j)] = flann.knnMatch(self.desc[i], self.desc[j], 2)
                 
                 # Lowe's
@@ -177,8 +178,11 @@ class SFM:
                         # F, mask = cv2.findFundamentalMat(src_pts, dst_pts, cv2.USAC_MAGSAC, ransacReprojThreshold=4.5)
                         # F, mask = cv2.findFundamentalMat(src_pts, dst_pts, cv2.USAC_MAGSAC, ransacReprojThreshold=5.0)
                         F, mask = cv2.findFundamentalMat(src_pts, dst_pts, cv2.USAC_MAGSAC, ransacReprojThreshold=3.5)
+                        # H, _ = cv2.findHomography(src_pts, dst_pts, cv2.USAC_MAGSAC, ransacReprojThreshold=3.5)
                         # F, mask = cv2.findFundamentalMat(src_pts, dst_pts, cv2.USAC_DEFAULT, ransacReprojThreshold=3.5)
                         # # self.M[(i,j)] = M
+                        
+                        # self.H[(i,j)] = H
                         self.F[(i,j)] = F
                         self.mask[(i,j)] = mask
                         # print(np.linalg.det(F) > 1e-7)
@@ -208,6 +212,7 @@ class SFM:
         elapsed = end - start # ms
         print(f"Elapsed Time: {elapsed}\n\n")
         
+        self.om = self.matches
         self.matches = self.good
         return self.good
     
@@ -300,6 +305,64 @@ class SFM:
             self.output_ft(i)
         
         self.output_match()
+
+    def add_data(self):
+        if os.path.exists(self.db_path):
+            print("Removing existing db")
+            os.remove(self.db_path)
+        self.db = database.COLMAPDatabase.connect(self.db_path)
+        self.db.create_tables()
+
+        self.cams = dict()
+
+        for key in self.itoimg:
+            camera = pycolmap.infer_camera_from_image(f'{self.src}/{self.itoimg[key]}')
+            # camera.model.name, camera.model.value, camera.width, camera.height, camera.params
+            self.db.add_camera(camera.model.value, camera.width, camera.height, camera.params)
+            self.cams[key+1] = pycolmap.Camera(camera_id=key+1, model=camera.model.value, width=camera.width, height=camera.height, params=camera.params)
+            
+            self.db.add_image(self.itoimg[key], key+1)
+        
+        self.db.commit()
+        
+        kps_per_frame = [np.array([[x.pt[0], x.pt[1], x.size, x.angle] for x in f[0]], dtype=np.float32) for f in self.desc]
+        desc_per_frame = [x[1] for x in self.desc]
+
+        for i, frame_kps in enumerate(kps_per_frame):
+            self.db.add_keypoints(i+1, frame_kps)
+
+        for i, frame_desc in enumerate(desc_per_frame):
+            self.db.add_descriptors(i+1, frame_desc)
+
+        self.db.commit()
+
+        # adding matches and two view geo to db
+        kps_2d = [np.array([[x.pt[0], x.pt[1]] for x in f[0]], dtype=np.float64) for f in self.desc]
+        for i in self.good.keys():
+            if isinstance(i, tuple):
+                m = np.array([[x.queryIdx,x.trainIdx] for x in self.good[i]], dtype=np.uint32)
+                # m = np.array([[x[0].queryIdx,x[0].trainIdx] for x in self.om[i]], dtype=np.uint32)
+                if len(m) > 0:
+                    self.db.add_matches(i[0]+1, i[1]+1, m)
+
+                    t_geo = pycolmap.estimate_calibrated_two_view_geometry(self.cams[i[0] + 1], kps_2d[i[0]], self.cams[i[1] + 1], kps_2d[i[1]], m).todict()
+                    
+                    # t_geo = pycolmap.estimate_calibrated_two_view_geometry(self.cams[i[0] + 1], kps_2d[i[0]][m[:,0]], 
+                    #                                                        self.cams[i[1] + 1], kps_2d[i[1]][m[:,1]]
+                    #                                                        ).todict()
+                    self.db.add_two_view_geometry(
+                        image_id1 = i[0]+1, 
+                        image_id2 = i[1]+1, 
+                        matches = t_geo['inlier_matches'], 
+                        F = t_geo['F'], 
+                        E = t_geo['E'],
+                        H = t_geo['H'],
+                        config = t_geo['config'])
+                    
+                    # print(t_geo['F'])
+                    
+
+        self.db.commit()
 
     def __add_data(self):
         if os.path.exists(self.db_path):
@@ -421,5 +484,6 @@ if __name__ == "__main__":
     kp, desc = test1.ft_extract()
     matches = test1.ft_match()
 
-    test1.reconstruction_sparse('colmap_test_out')
-    test1.reconstruction_dense('colmap_test_out', model_folder='/1')
+    test1.add_data()
+    # test1.reconstruction_sparse('colmap_test_out')
+    # test1.reconstruction_dense('colmap_test_out', model_folder='/1')
