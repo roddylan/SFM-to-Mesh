@@ -340,8 +340,8 @@ class SFM:
         kps_2d = [np.array([[x.pt[0], x.pt[1]] for x in f[0]], dtype=np.float64) for f in self.desc]
         for i in self.good.keys():
             if isinstance(i, tuple):
-                # m = np.array([[x.queryIdx,x.trainIdx] for x in self.good[i]], dtype=np.uint32)
-                m = np.array([[x[0].queryIdx,x[0].trainIdx] for x in self.om[i]], dtype=np.uint32)
+                m = np.array([[x.queryIdx,x.trainIdx] for x in self.good[i]], dtype=np.uint32)
+                # m = np.array([[x[0].queryIdx,x[0].trainIdx] for x in self.om[i]], dtype=np.uint32)
                 if len(m) > 0:
                     self.db.add_matches(i[0]+1, i[1]+1, m)
 
