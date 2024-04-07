@@ -105,11 +105,13 @@ class Reconstruction:
         if radius is None:
             D = pcd.compute_nearest_neighbor_distance()
             avg_D = np.mean(D)
-            r = 3 * avg_D
+            radius = 3 * avg_D
+        
+        radius = np.float64(radius)
 
         self.mesh = o3d.geometry.TriangleMesh.create_from_point_cloud_ball_pivoting(
             pcd,
-            o3d.utility.DoubleVector([r, r * 2])
+            o3d.utility.DoubleVector([radius, radius * 2])
         )
 
         return self.mesh
