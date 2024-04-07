@@ -112,10 +112,16 @@ class Reconstruction:
             print("No mesh provided")
             return
         
+        if type(mesh) is not list:
+            mesh = [mesh]
+        
         if out is not None and out != "":
             # create ply file
             return
         # display ply 
+        # o3d.visualization.draw_geometries(mesh, name="reconstructed mesh")
+        o3d.visualization.draw_geometries(mesh)
+        
         return
     
     def show_pcd(self, pcd=None, name="", show_norm=False):

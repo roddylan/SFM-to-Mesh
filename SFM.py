@@ -100,8 +100,8 @@ class SFM:
         
         norm = cv2.NORM_HAMMING
         N = self.n
-        # MIN_MATCH_COUNT = min(15, mmc)
-        # MIN_MATCH_COUNT = max(15, mmc)
+        # MIN_MATCH_COUNT = min(12, mmc)
+        # MIN_MATCH_COUNT = max(12, mmc)
         MIN_MATCH_COUNT = mmc
         
         # https://docs.opencv.org/3.4/d1/de0/tutorial_py_feature_homography.html
