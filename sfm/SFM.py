@@ -250,7 +250,7 @@ class SFM:
             scale = self.desc[i][0][j].size
             orientation = self.desc[i][0][j].angle
 
-            D = desc[i][1][j].astype(np.int64).flatten()
+            D = self.desc[i][1][j].astype(np.int64).flatten()
             D_txt = ' '.join([f"{d}" for d in D])
             cur = f"\n{x} {y} {scale} {orientation} {D_txt}"
             text += cur
