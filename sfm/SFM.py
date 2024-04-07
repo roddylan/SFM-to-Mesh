@@ -5,11 +5,11 @@ from skimage.measure import ransac
 import time, os, shutil, platform, glob
 from tqdm import tqdm
 from collections import defaultdict
-from sfm.utils import database
+from sfm.utils import database, utils
 import pycolmap, plyfile
 
 class SFM:
-    def __init__(self, src, db_path='database.db', K=None):
+    def __init__(self, src, db_path='database.db', K=None, preprocess=False):
         self.K = K
         self.src = src
         self.get_imgs(src)
@@ -21,10 +21,44 @@ class SFM:
         self.detector = cv2.BRISK_create()
         self.descriptor = cv2.SIFT_create()
 
-    def pre_proc_img(self):
-        # create bbox + get rid of radial distortion
+        self.preprocess = preprocess
+        if preprocess:
+            self.lowpass_val = 55
+
+    def set_pre_proc_params(self, l):
         pass
 
+    def pre_proc_img(self, im, kp, desc):
+        # Using edge detection, and image filtering to mask object
+        frame = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
+
+        frame = cv2.GaussianBlur(frame, (5,5), 0)
+        edges = cv2.Canny(frame, 50, 200)
+
+        edges = utils.lowpassFilter(edges, 55)
+        ret, mask = cv2.threshold(edges, 128, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+
+        masked_frame = cv2.bitwise_and(im, im, mask=mask)
+
+        if np.mean(mask) < 80:
+            print("Loss of data due to preprocessing, returning original data")
+            return kp
+
+        kps_good = []
+        descs_kps_good = []
+        descs_grad_good = []
+
+        kps_pt = [k.pt for k in kp]
+        kps_mean_col = [masked_frame[np.uint16(k[1])][np.uint16(k[0])] for k in kps_pt]
+
+        for i in range(len(kps_mean_col)):
+            if not np.any(kps_mean_col[i]):
+                continue
+            kps_good.append(kp[i])
+            descs_kps_good.append(desc[0][i])
+            descs_grad_good.append(desc[1][i])
+
+        return kps_good, [descs_kps_good, np.array(descs_grad_good, dtype=np.float32)]
 
     def get_imgs(self, src):
         self.im = []
@@ -72,6 +106,9 @@ class SFM:
             
             kp = self.detector.detect(im)
             desc = self.descriptor.compute(im, kp)
+
+            if self.preprocess:
+                kp, desc = self.pre_proc_img(im, kp, desc)
             
             # kp, desc = self.brisk.detectAndCompute(im, None)
             # kp, desc = self.descriptor.detectAndCompute(im, None)
