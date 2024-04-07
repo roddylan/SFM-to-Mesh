@@ -97,9 +97,23 @@ class Reconstruction:
 
         
 
-    def bpa(self, radii: list, pcd,):
+    def bpa(self, pcd=None, radius=None):
         # assumes normals in poly
-        pass
+        if pcd is None:
+            pcd = self.pcd
+        
+        if radius is None:
+            D = pcd.compute_nearest_neighbor_distance()
+            avg_D = np.mean(D)
+            r = 3 * avg_D
+
+        self.mesh = o3d.geometry.TriangleMesh.create_from_point_cloud_ball_pivoting(
+            pcd,
+            o3d.utility.DoubleVector([r, r * 2])
+        )
+
+        return self.mesh
+
 
     def alpha(self):
         pass
