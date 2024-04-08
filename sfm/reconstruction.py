@@ -108,7 +108,6 @@ class Reconstruction:
             radius = 3 * avg_D
             radii = [radius, radius * 2]
         
-        radius = np.float64(radius)
 
         self.mesh = o3d.geometry.TriangleMesh.create_from_point_cloud_ball_pivoting(
             pcd,
