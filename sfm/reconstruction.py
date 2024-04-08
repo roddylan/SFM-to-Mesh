@@ -97,21 +97,21 @@ class Reconstruction:
 
         
 
-    def bpa(self, pcd=None, radius=None):
+    def bpa(self, pcd=None, radii=None):
         # assumes normals in poly
         if pcd is None:
             pcd = self.pcd
         
-        if radius is None:
+        if radii is None:
             D = pcd.compute_nearest_neighbor_distance()
             avg_D = np.mean(D)
             radius = 3 * avg_D
+            radii = [radius, radius * 2]
         
-        radius = np.float64(radius)
 
         self.mesh = o3d.geometry.TriangleMesh.create_from_point_cloud_ball_pivoting(
             pcd,
-            o3d.utility.DoubleVector([radius, radius * 2])
+            o3d.utility.DoubleVector(radii)
         )
 
         return self.mesh

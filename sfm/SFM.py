@@ -6,7 +6,9 @@ import time, os, shutil, platform, glob
 from tqdm import tqdm
 from collections import defaultdict
 from sfm.utils import database, utils
+# from utils import database, utils
 import pycolmap, plyfile
+import matplotlib.pyplot as plt
 
 class SFM:
     def __init__(self, src, db_path='database.db', K=None, preprocess=False, brisk=True):
@@ -226,6 +228,7 @@ class SFM:
         n_pairs = 0
         pairs = []
         self.adj = np.zeros((self.n, self.n))
+        self.oadj = np.zeros((self.n, self.n))
         
         for i in range(self.n-1):
             for j in range(i, self.n):
@@ -235,8 +238,9 @@ class SFM:
                     pairs.append((i,j))
                     # self.adj[i][j] = 1
                     self.adj[i][j] = sz
+                    self.oadj[i][j] = 1
 
-        return self.adj, pairs
+        return self.adj, self.oadj, pairs
     
     def get_camera_info(self):
         for key in self.itoimg:
@@ -440,11 +444,19 @@ class SFM:
 
 
 if __name__ == "__main__":
-    test1 = SFM(src="datasets/templeRing")
+    test1 = SFM(src="datasets/pbottle", brisk=True)
 
     kp, desc = test1.ft_extract()
     matches = test1.ft_match()
 
-    test1.add_data()
+    # test1.add_data()
+    test1.output()
+    adj, oadj, _ = test1.adj_list()
+
+    plt.imshow(oadj)
+    plt.show()
+    plt.imshow(adj)
+    plt.show()
+
     # test1.reconstruction_sparse('colmap_test_out')
     # test1.reconstruction_dense('colmap_test_out', model_folder='/1')
