@@ -309,13 +309,7 @@ class SFM:
         
         self.output_match()
 
-    def add_data(self):
-        if os.path.exists(self.db_path):
-            print("Removing existing db")
-            os.remove(self.db_path)
-        self.db = database.COLMAPDatabase.connect(self.db_path)
-        self.db.create_tables()
-
+    def add_cams(self):
         self.cams = dict()
 
         for key in self.itoimg:
@@ -327,7 +321,8 @@ class SFM:
             self.db.add_image(self.itoimg[key], key+1)
         
         self.db.commit()
-        
+
+    def add_ft(self):
         kps_per_frame = [np.array([[x.pt[0], x.pt[1], x.size, x.angle] for x in f[0]], dtype=np.float32) for f in self.desc]
         desc_per_frame = [x[1] for x in self.desc]
 
@@ -338,6 +333,17 @@ class SFM:
             self.db.add_descriptors(i+1, frame_desc)
 
         self.db.commit()
+
+    def add_data(self):
+        if os.path.exists(self.db_path):
+            print("Removing existing db")
+            os.remove(self.db_path)
+        self.db = database.COLMAPDatabase.connect(self.db_path)
+        self.db.create_tables()
+
+        self.add_cams()
+        
+        self.add_ft()
 
         # adding matches and two view geo to db
         kps_2d = [np.array([[x.pt[0], x.pt[1]] for x in f[0]], dtype=np.float64) for f in self.desc]
@@ -368,55 +374,7 @@ class SFM:
         self.db.commit()
 
     def __add_data(self):
-        if os.path.exists(self.db_path):
-            print("Removing existing db")
-            os.remove(self.db_path)
-        self.db = database.COLMAPDatabase.connect(self.db_path)
-        self.db.create_tables()
-
-        # adding camera info for pycolmap
-        cam_model, cam_model_value, img_w, img_h, cam_params = self.get_camera_info()
-        
-        self.cam_id = self.db.add_camera(cam_model_value, img_w, img_h, cam_params)
-        self.cam_obj = pycolmap.Camera(camera_id=1, model=cam_model_value, width=img_w, height=img_h, params=cam_params)
-        
-        # adding images
-        for key in self.itoimg:
-            self.db.add_image(self.itoimg[key], self.cam_id)
-
-        self.db.commit()
-
-        # adding keypoints and descriptors to db
-        kps_per_frame = [np.array([[y.pt[0], y.pt[1], y.size, y.angle] for y in x[0]], dtype=np.float32) for x in self.desc]
-        desc_per_frame = [x[1] for x in self.desc]
-
-        for i, frame_kps in enumerate(kps_per_frame):
-            self.db.add_keypoints(i+1, frame_kps)
-
-        for i, frame_desc in enumerate(desc_per_frame):
-            self.db.add_descriptors(i+1, frame_desc)
-
-        self.db.commit()
-
-        # adding matches and two view geo to db
-        kps_2d = [np.array([[y.pt[0], y.pt[1]] for y in x[0]], dtype=np.float64) for x in self.desc]
-
-        for i in self.good.keys():
-            if isinstance(i, tuple):
-                m = np.array([[x.queryIdx,x.trainIdx] for x in self.good[i]], dtype=np.uint32)
-                if len(m) > 0:
-                    self.db.add_matches(i[0]+1, i[1]+1, m)
-                    t_geo = pycolmap.estimate_calibrated_two_view_geometry(self.cam_obj, kps_2d[i[0]], self.cam_obj, kps_2d[i[1]], m).todict()
-                    self.db.add_two_view_geometry(
-                        image_id1 = i[0]+1, 
-                        image_id2 = i[1]+1, 
-                        matches = t_geo['inlier_matches'], 
-                        F = t_geo['F'], 
-                        E = t_geo['E'],
-                        H = t_geo['H'],
-                        config = t_geo['config'])
-
-        self.db.commit()
+        self.add_data()
 
     def reconstruction_sparse(self, dest, obj_name='object'):
         print("\n\nSPARSE RECONSTUCTION....")
