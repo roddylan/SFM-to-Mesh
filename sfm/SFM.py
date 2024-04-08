@@ -9,7 +9,7 @@ from sfm.utils import database, utils
 import pycolmap, plyfile
 
 class SFM:
-    def __init__(self, src, db_path='database.db', K=None, preprocess=False):
+    def __init__(self, src, db_path='database.db', K=None, preprocess=False, brisk=True):
         self.K = K
         self.src = src
         self.get_imgs(src)
@@ -17,8 +17,11 @@ class SFM:
         self.db_path = db_path
         
         # self.brisk = cv2.BRISK_create() # TODO: maybe just use BRISK - BRISK
-
-        self.detector = cv2.BRISK_create()
+        
+        if brisk:
+            self.detector = cv2.BRISK_create()
+        else:
+            self.detector = cv2.SIFT_create()
         self.descriptor = cv2.SIFT_create()
 
         self.preprocess = preprocess
