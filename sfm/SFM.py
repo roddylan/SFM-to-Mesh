@@ -5,7 +5,7 @@ from skimage.measure import ransac
 import time, os, shutil, platform, glob
 from tqdm import tqdm
 from collections import defaultdict
-from utils import database, utils
+from sfm.utils import database, utils
 import pycolmap, plyfile
 import matplotlib.pyplot as plt
 
@@ -443,7 +443,7 @@ class SFM:
 
 
 if __name__ == "__main__":
-    test1 = SFM(src="datasets/templeRing")
+    test1 = SFM(src="datasets/lego4", brisk=False)
 
     kp, desc = test1.ft_extract()
     matches = test1.ft_match()
