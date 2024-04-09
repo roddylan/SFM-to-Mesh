@@ -11,11 +11,13 @@ import pycolmap, plyfile
 import matplotlib.pyplot as plt
 
 class SFM:
-    def __init__(self, src, db_path='database.db', K=None, preprocess=False, brisk=True):
+    def __init__(self, src, db_path='database.db', K=None, preprocess=False, brisk=True, reproj_thresh=3.5):
         self.K = K
         self.src = src
         self.get_imgs(src)
         
+        self.thresh = reproj_thresh
+
         self.db_path = db_path
         
         # self.brisk = cv2.BRISK_create() # TODO: maybe just use BRISK - BRISK
@@ -182,7 +184,7 @@ class SFM:
                         # F, mask = cv2.findFundamentalMat(src_pts, dst_pts, cv2.USAC_MAGSAC, ransacReprojThreshold=3.0)
                         # F, mask = cv2.findFundamentalMat(src_pts, dst_pts, cv2.USAC_MAGSAC, ransacReprojThreshold=4.5)
                         # F, mask = cv2.findFundamentalMat(src_pts, dst_pts, cv2.USAC_MAGSAC, ransacReprojThreshold=5.0)
-                        F, mask = cv2.findFundamentalMat(src_pts, dst_pts, cv2.USAC_MAGSAC, ransacReprojThreshold=3.5)
+                        F, mask = cv2.findFundamentalMat(src_pts, dst_pts, cv2.USAC_MAGSAC, ransacReprojThreshold=self.thresh)
                         # H, _ = cv2.findHomography(src_pts, dst_pts, cv2.USAC_MAGSAC, ransacReprojThreshold=3.5)
                         # F, mask = cv2.findFundamentalMat(src_pts, dst_pts, cv2.USAC_DEFAULT, ransacReprojThreshold=3.5)
                         # # self.M[(i,j)] = M
