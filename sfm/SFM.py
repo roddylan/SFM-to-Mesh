@@ -11,12 +11,16 @@ import pycolmap, plyfile
 import matplotlib.pyplot as plt
 
 class SFM:
-    def __init__(self, src, db_path='database.db', K=None, preprocess=False, brisk=True, reproj_thresh=3.5):
+    def __init__(self, src, db_path='database.db', K=None, preprocess=False, brisk=True, reproj_thresh=None):
         self.K = K
         self.src = src
         self.get_imgs(src)
         
-        self.thresh = reproj_thresh
+        if reproj_thresh is None:
+            self.thresh = 3.5 if brisk else 5.0
+
+        else:
+            self.thresh = reproj_thresh
 
         self.db_path = db_path
         
