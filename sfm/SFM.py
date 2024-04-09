@@ -47,7 +47,7 @@ class SFM:
 
         if np.mean(mask) < 80:
             print("Loss of data due to preprocessing, returning original data")
-            return kp
+            return kp, desc
 
         kps_good = []
         descs_kps_good = []
