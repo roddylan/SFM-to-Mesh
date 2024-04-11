@@ -39,6 +39,8 @@ class SFM:
 
     def set_pre_proc_params(self, 
                             gaussian_ksize=9,
+                            dog_flag=False,
+                            dog_scale=3,
                             canny_threshold_0=0,
                             canny_threshold_1=100,
                             lowpass_ksize=35,
@@ -47,6 +49,8 @@ class SFM:
                             acceptance_threshold=0.1):
         self.preproc_params = {
             'Gauss': gaussian_ksize,
+            'dog_flag': dog_flag,
+            'dog_scale': dog_scale,
             'Canny_t0': canny_threshold_0,
             'Canny_t1': canny_threshold_1,
             'Lowpass': lowpass_ksize,
@@ -55,14 +59,14 @@ class SFM:
             'Accept': acceptance_threshold
         }
 
-    def pre_proc_img(self, im, kp, desc, dog=False):
+    def pre_proc_img(self, im, kp, desc):
         # Using edge detection, and image filtering to mask object
         frame = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
 
-        if dog:
+        if self.preproc_params['dog_flag']:
             # Gaussian difference
             g0 = cv2.GaussianBlur(frame, (self.preproc_params['Gauss'],self.preproc_params['Gauss']), 0)
-            g1 = cv2.GaussianBlur(frame, (self.preproc_params['Gauss']*3,self.preproc_params['Gauss']*3), 0)
+            g1 = cv2.GaussianBlur(frame, (self.preproc_params['Gauss'] * self.preproc_params['dog_scale'],self.preproc_params['Gauss'] * self.preproc_params['dog_scale']), 0)
             
             frame = cv2.GaussianBlur(g1 - g0, (self.preproc_params['Gauss']*3,self.preproc_params['Gauss']*3), 0)
         else:
