@@ -34,10 +34,26 @@ class SFM:
 
         self.preprocess = preprocess
         if preprocess:
-            self.lowpass_val = 55
+            self.preproc_params = {}
+            self.set_pre_proc_params()
 
-    def set_pre_proc_params(self, l):
-        pass
+    def set_pre_proc_params(self, 
+                            gaussian_ksize=9,
+                            canny_threshold_0=0,
+                            canny_threshold_1=100,
+                            lowpass_ksize=35,
+                            median_0_ksize=95,
+                            median_1_ksize=95,
+                            acceptance_threshold=0.1):
+        self.preproc_params = {
+            'Gauss': gaussian_ksize,
+            'Canny_t0': canny_threshold_0,
+            'Canny_t1': canny_threshold_1,
+            'Lowpass': lowpass_ksize,
+            'Median_0': median_0_ksize,
+            'Median_1': median_1_ksize,
+            'Accept': acceptance_threshold
+        }
 
     def pre_proc_img(self, im, kp, desc, dog=False):
         # Using edge detection, and image filtering to mask object
@@ -45,23 +61,23 @@ class SFM:
 
         if dog:
             # Gaussian difference
-            g0 = cv2.GaussianBlur(frame, (5,5), 0)
-            g1 = cv2.GaussianBlur(frame, (25,25), 0)
+            g0 = cv2.GaussianBlur(frame, (self.preproc_params['Gauss'],self.preproc_params['Gauss']), 0)
+            g1 = cv2.GaussianBlur(frame, (self.preproc_params['Gauss']*3,self.preproc_params['Gauss']*3), 0)
             
-            frame = cv2.GaussianBlur(g1 - g0, (25,25), 0)
+            frame = cv2.GaussianBlur(g1 - g0, (self.preproc_params['Gauss']*3,self.preproc_params['Gauss']*3), 0)
         else:
-            frame = cv2.GaussianBlur(frame, (5,5), 0)
+            frame = cv2.GaussianBlur(frame, (self.preproc_params['Gauss'],self.preproc_params['Gauss']), 0)
             
-        edges = cv2.Canny(frame, 50, 200)
+        edges = cv2.Canny(frame, self.preproc_params['Canny_t0'], self.preproc_params['Canny_t1'])
 
-        edges = utils.lowpassFilter(edges, 55)
+        edges = utils.lowpassFilter(edges, self.preproc_params['Lowpass'])
         ret, mask = cv2.threshold(edges, 128, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+
+        mask = cv2.medianBlur(mask, self.preproc_params['Median_0'])
+        mask = cv2.medianBlur(mask, self.preproc_params['Median_1'])
 
         masked_frame = cv2.bitwise_and(im, im, mask=mask)
 
-        if np.mean(mask) < 80:
-            print("Loss of data due to preprocessing, returning original data")
-            return kp, desc
 
         kps_good = []
         descs_kps_good = []
@@ -70,12 +86,19 @@ class SFM:
         kps_pt = [k.pt for k in kp]
         kps_mean_col = [masked_frame[np.uint16(k[1])][np.uint16(k[0])] for k in kps_pt]
 
+        removed = 0
         for i in range(len(kps_mean_col)):
             if not np.any(kps_mean_col[i]):
+                removed += 1
                 continue
             kps_good.append(kp[i])
             descs_kps_good.append(desc[0][i])
             descs_grad_good.append(desc[1][i])
+        
+        score = removed/len(kps_pt) + frame.shape[1]/(10000*np.mean(mask) - 1e-15)
+        if score > self.preproc_params['Accept']:
+            print("Loss of data due to preprocessing, returning original data, score: ", score)
+            return kp, desc
         
         descs = [descs_kps_good, np.array(descs_grad_good, dtype=np.float32)]
 
