@@ -53,7 +53,7 @@ class SFM:
 
         if np.mean(mask) < 80:
             print("Loss of data due to preprocessing, returning original data")
-            return kp
+            return kp, desc
 
         kps_good = []
         descs_kps_good = []
@@ -68,8 +68,10 @@ class SFM:
             kps_good.append(kp[i])
             descs_kps_good.append(desc[0][i])
             descs_grad_good.append(desc[1][i])
+        
+        descs = [descs_kps_good, np.array(descs_grad_good, dtype=np.float32)]
 
-        return kps_good, [descs_kps_good, np.array(descs_grad_good, dtype=np.float32)]
+        return kps_good, descs
 
     def get_imgs(self, src):
         self.im = []
