@@ -39,16 +39,19 @@ class SFM:
     def set_pre_proc_params(self, l):
         pass
 
-    def pre_proc_img(self, im, kp, desc):
+    def pre_proc_img(self, im, kp, desc, dog=False):
         # Using edge detection, and image filtering to mask object
         frame = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
 
-        # Gaussian difference
-        g0 = cv2.GaussianBlur(frame, (5,5), 0)
-        g1 = cv2.GaussianBlur(frame, (25,25), 0)
-        
-        frame = cv2.GaussianBlur(g1 - g0, (25,25), 0)
-        
+        if dog:
+            # Gaussian difference
+            g0 = cv2.GaussianBlur(frame, (5,5), 0)
+            g1 = cv2.GaussianBlur(frame, (25,25), 0)
+            
+            frame = cv2.GaussianBlur(g1 - g0, (25,25), 0)
+        else:
+            frame = cv2.GaussianBlur(frame, (5,5), 0)
+            
         edges = cv2.Canny(frame, 50, 200)
 
         edges = utils.lowpassFilter(edges, 55)
