@@ -80,7 +80,7 @@ class Reconstruction:
 
 
 
-    def poisson(self, depth=8, width=0, scale=1.25, l_fit=False, pcd=None):
+    def poisson(self, depth=8, width=0, scale=1.25, l_fit=False, pcd=None, crop=True):
         # assumes normals in poly
         if pcd is None:
             pcd = self.pcd
@@ -92,6 +92,10 @@ class Reconstruction:
             scale=scale,
             linear_fit=l_fit
         )[0]
+
+        if crop:
+            bbox = pcd.get_axis_aligned_bounding_box()
+            self.mesh = self.mesh.crop(bbox)
 
         return self.mesh
 
