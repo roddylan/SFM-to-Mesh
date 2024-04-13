@@ -1,11 +1,11 @@
-dino data set -- 363 views sampled on a hemisphere
+dinoRing data set -- 48 views sampled on a ring
 
 The object is an untextured, matte, ceramic dinosaur against a black background.
 Note that the object is partially outside the field of view in some images.  Also, there are some dark shadows on the object--be conservative if using thresholding to detect background pixels.
 
 The (tight) bounding box for the dino model is
-(-0.041897 0.001126 -0.037845)
-(0.030897 0.088227 0.035495)
+(-0.021897 0.021126 -0.017845)
+(0.050897 0.108227 0.055495)
 
 --------------------------
 Created by Steve Seitz, James Diebel, Daniel Scharstein, Brian Curless, and Rick Szeliski
@@ -31,3 +31,4 @@ Some multiview stereo algorithms start from the visual hull after extracting per
   3. eroded by 7 pixels
 
 All of these operations are straightforward in Matlab.  You are free to use this recipe.
+
