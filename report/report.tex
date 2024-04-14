@@ -213,6 +213,7 @@
 % *** ALIGNMENT PACKAGES ***
 %
 \usepackage{array}
+\usepackage{tabularray}
 % Frank Mittelbach's and David Carlisle's array.sty patches and improves
 % the standard LaTeX2e array and tabular environments to provide better
 % appearance and additional user controls. As the default LaTeX2e table
@@ -303,7 +304,7 @@
 
 
 
-
+\usepackage{multirow}
 % *** PDF, URL AND HYPERLINK PACKAGES ***
 %
 %\usepackage{url}
@@ -731,6 +732,22 @@ Open3D's radial and statistical point cloud outlier removal
 algorithms to automate background noise removal \cite{pcr},
 improving overall mesh quality for both approaches. 
 
+\section{Results}
+\begin{figure}[ht!]
+    \centering
+    \subfloat[SIFT Features]{\includegraphics[width=.2\textwidth]{figures/res/sift.png}}
+    \
+    \subfloat[BRISK Features]{\includegraphics[width=.2\textwidth]{figures/res/brisk.png}}
+    \caption{SIFT vs BRISK detected features}
+    \label{fig:br_vs_si}
+\end{figure}
+
+
+\begin{tblr}{|c|c|c|}
+    \hline
+    
+    
+\end{tblr}
 % \section{Results}
 
 % \section{Conclusions}
