@@ -547,7 +547,18 @@ mesh reconstruction. The source code for the project can be found on
 \section{Theory and Technical Details}
 This project largely focuses on alterations to SFM and post processing SFM-MVS 
 output for mesh construction. The general workflow and steps taken in this project
-can be seen in Figure \ref{fig:pipeline}.
+can be seen in Figure \ref{fig:pipeline} and are the following:
+\begin{enumerate}[1.]
+    \item We implement a custom BRISK-SIFT feature extraction stack for SFM
+    \item We implement feature matching using approximate nearest neighbors
+    for speed, with outlier removal from Lowe's Ratio Test \cite{sift} and MAGSAC++ 
+    \cite{magsac}
+    \item We implement a feature processing method to further simplify key point 
+    matches
+    \item Our features and matches are used to build sparse and dense reconstructions
+    via COLMAP \cite{colmap}
+    \item Resultant point clouds are processed and used to generate meshes
+\end{enumerate}
 \begin{figure}[ht!]
     \centering
     {{\includegraphics[width=.4\textwidth]{figures/pipeline.png} }}
@@ -618,8 +629,32 @@ as well as multiview stereo, are handled through COLMAP \cite{colmap}
 \cite{schoenberger2016sfm} \cite{schoenberger2016mvs}, resulting in sparse 
 and dense point cloud reconstructions (with estimated surface normals).
 
-% \subsubsection{Image Capturing}
-% Image capturing techniques for SFM
+
+
+\subsubsection{Image Capturing}
+Image capturing for SFM was primarily focused on small objects with 
+three things in mind:
+\begin{enumerate}[1.]
+    \item Brightness constancy (via controlled lighting)
+    \item Angle variety and image overlap
+    \item Limited background noise (via. lightboxes/backdrops as shown in Figure \ref{fig:backdrops})
+    (\textit{note: this is not present for some earlier datasets})
+\end{enumerate}
+\begin{figure}[ht!]
+    \subfloat[Black backdrop]{\includegraphics[width=.3\textwidth]{figures/black lbox.png}}
+    \
+    \subfloat[White backdrop]{\includegraphics[width=.17\textwidth]{figures/white lbox.jpg}}
+    \caption{Lightbox-like backdrops}
+    \label{fig:backdrops}
+\end{figure}
+Angle variety and image overlap was achieved by taking images in short intervals,
+between either camera motion or object motion (ie. physical rotation). Overlap for 
+large objects (ie. buildings) was achieved through capturing every 3-5 steps. 
+\\
+The overall methodology for capturing smaller objects throughout the project was 
+based on \cite{temple} and \cite{viking}.
+
+
 
 \subsection{Feature Preprocessing}
 During feature extraction, further processing can be 
@@ -631,7 +666,7 @@ image filtering, blurring, and canny edge detection to build a binary mask
     \subfloat[Initial Image]{\includegraphics[width=.2\textwidth]{figures/temple.png}}
     \
     \subfloat[Binary mask]{\includegraphics[width=.2\textwidth]{figures/temple_mask.png}}
-    \caption{Binary Mask}
+    \caption{Binary Mask. Dataset from \cite{temple}}
     \label{fig:mask}
 \end{figure}
 This mask is used to discard key points which are determined to be background noise.
@@ -662,7 +697,7 @@ allow us to obtain edge gradients and directions \cite{ced_ocv} as follows:
     G = \sqrt{G_x^2 + G_y^2}, \ \ \ \theta = \arctan \left( \dfrac{G_y}{G_x} \right)
 \] where $G$ is the edge gradient and $\theta$ is the edge direction.
 \\
-Non-maximum suppression removes unwanted pixels that may not be part of an edge \cite{}.
+Non-maximum suppression removes unwanted pixels that may not be part of an edge \cite{ced_ocv}.
 Hystersis thresholding determines edge criterion via a user defined 
 lower-upper bound $(l,u)$:
 \begin{enumerate}[i]
@@ -685,7 +720,7 @@ and an example is how in Figure \ref{fig:ppc}
 \begin{figure}[ht!]
     \centering
     \includegraphics[width=.4\textwidth]{figures/preproc pipeline.png}
-    \caption{Feature preprocessing pipeline}
+    \caption{Feature preprocessing pipeline. Dataset from \cite{viking}}
     \label{fig:ppc_pipe}
 \end{figure}
 \begin{figure}[ht!]
@@ -733,21 +768,77 @@ algorithms to automate background noise removal \cite{pcr},
 improving overall mesh quality for both approaches. 
 
 \section{Results}
+Initial evaluation involved a direct benchmark of 
+BRISK and SIFT feature detectors for various datasets.
 \begin{figure}[ht!]
     \centering
     \subfloat[SIFT Features]{\includegraphics[width=.2\textwidth]{figures/res/sift.png}}
     \
     \subfloat[BRISK Features]{\includegraphics[width=.2\textwidth]{figures/res/brisk.png}}
-    \caption{SIFT vs BRISK detected features}
+    \caption{SIFT vs BRISK detected features (ssd box)}
     \label{fig:br_vs_si}
 \end{figure}
+\begin{figure}[ht!]
+    \centering
+    \subfloat[SIFT Features]{\includegraphics[width=.2\textwidth]{figures/res/sift_temple.png}}
+    \
+    \subfloat[BRISK Features]{\includegraphics[width=.2\textwidth]{figures/res/brisk_temple.png}}
+    \caption{SIFT vs BRISK detected features (templeRing \cite{temple})}
+    \label{fig:brt_vs_sit}
+\end{figure}
+Both Figures \ref{fig:br_vs_si} and \ref{fig:brt_vs_sit}, as well as Table \ref{tbl:kpe_n}, 
+demonstrate a substantial difference in overall ability. Referring to Figure \ref{fig:br_vs_si}, it is clear that 
+SIFT detection is able to find nearly all the points BRISK detection finds, as well as
+more subtle features like the entire edge of the box (which BRISK largely fails to detect).
+However, Figure \ref{fig:brt_vs_sit} suggests that these more "nuanced" feature points
+may be more akin to noise (detections on black background) and are unneeded. 
+Additionally, BRISK is considerably faster than SIFT as seen in Table \ref{tbl:kpe_t}
+and still produces a large number of high quality points in textured regions 
+(ie. areas with text in Figure \ref{fig:br_vs_si}). 
+\begin{table}[ht!]
+    \centering
+    \caption{Keypoint Extraction (No. of keypoints extracted)}
+    \label{tbl:kpe_n}
+    \begin{tblr}{|c|c|c|}
+        \hline 
+        Dataset & SIFT  & BRISK \\
+        \hline \hline
+        Temple Ring \cite{temple}& 39945 & 42789 \\
+        \hline
+        Viking \cite{viking} & 58604 & 145037 \\
+        \hline
+        Lego5 & 60767 & 53192 \\
+        \hline
+        Keyboard & 219924 & 204750
+        \\
+        \hline
+        Ace Coffee Building & 164260 & 212897
+        \\ \hline
+    \end{tblr}
+\end{table}
 
 
-\begin{tblr}{|c|c|c|}
-    \hline
-    
-    
-\end{tblr}
+\begin{table}[ht!]
+    \centering
+    \caption{Keypoint Extraction (Time (s))}
+    \label{tbl:kpe_t}
+    \begin{tblr}{|c|c|c|}
+        \hline 
+        Dataset & SIFT  & BRISK \\
+        \hline \hline
+        Temple Ring \cite{temple}& 3.8003 & 1.2922 \\
+        \hline
+        Viking \cite{viking} & 5.3268 & 3.2936 \\
+        \hline
+        Lego5 & 87.4832 & 16.2658 \\
+        \hline
+        Keyboard & 44.5370 & 12.0966
+        \\
+        \hline
+        Ace Coffee Building & 18.0179 & 7.2542
+        \\ \hline
+    \end{tblr}
+\end{table}
 % \section{Results}
 
 % \section{Conclusions}
@@ -770,13 +861,13 @@ improving overall mesh quality for both approaches.
 
 
 % use section* for acknowledgment
-% \ifCLASSOPTIONcompsoc
-%   % The Computer Society usually uses the plural form
-%   \section*{Acknowledgments}
-% \else
-%   % regular IEEE prefers the singular form
-%   \section*{Acknowledgment}
-% \fi
+\ifCLASSOPTIONcompsoc
+  % The Computer Society usually uses the plural form
+  \section*{Acknowledgments}
+\else
+  % regular IEEE prefers the singular form
+  \section*{Acknowledgment}
+\fi
 
 
 % The authors would like to thank...
