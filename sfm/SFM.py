@@ -65,10 +65,10 @@ class SFM:
 
         if self.preproc_params['dog_flag']:
             # Gaussian difference
-            g0 = cv2.GaussianBlur(frame, (self.preproc_params['Gauss'],self.preproc_params['Gauss']), 1.3)
-            g1 = cv2.GaussianBlur(frame, (self.preproc_params['Gauss'],self.preproc_params['Gauss']), 1.5)
+            g0 = cv2.GaussianBlur(frame, (self.preproc_params['Gauss'],self.preproc_params['Gauss']), 1.1)
+            g1 = cv2.GaussianBlur(frame, (self.preproc_params['Gauss'],self.preproc_params['Gauss']), 2.2)
             
-            frame = cv2.GaussianBlur(g1 - g0, (23, 23), 0)
+            frame = cv2.GaussianBlur(g1 - g0, (27, 27), 0)
         else:
             frame = cv2.GaussianBlur(frame, (self.preproc_params['Gauss'],self.preproc_params['Gauss']), 0)
             

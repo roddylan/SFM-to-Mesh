@@ -110,7 +110,8 @@ class Reconstruction:
             D = pcd.compute_nearest_neighbor_distance()
             avg_D = np.mean(D)
             radius = 3 * avg_D
-            radii = [radius, radius * 2]
+            # radii = [radius, radius * 2]
+            radii = [.5*radius, radius, radius * 2, radius * 4]
         
 
         self.mesh = o3d.geometry.TriangleMesh.create_from_point_cloud_ball_pivoting(
