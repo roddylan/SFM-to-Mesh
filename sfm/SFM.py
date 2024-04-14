@@ -208,8 +208,9 @@ class SFM:
                 # self.matches[(i,j)] = flann.knnMatch(self.desc[i], self.desc[j], 2)
                 
                 # Lowe's
+                l = .7
                 for m, n in self.matches[(i, j)]:
-                    if m.distance < 0.7 * n.distance:
+                    if m.distance < l * n.distance:
                         self.good[(i,j)].append(m)
 
                 if len(self.good[(i,j)]) > MIN_MATCH_COUNT:
