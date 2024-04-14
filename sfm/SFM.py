@@ -68,7 +68,7 @@ class SFM:
             g0 = cv2.GaussianBlur(frame, (self.preproc_params['Gauss'],self.preproc_params['Gauss']), 0)
             g1 = cv2.GaussianBlur(frame, (self.preproc_params['Gauss'] * self.preproc_params['dog_scale'],self.preproc_params['Gauss'] * self.preproc_params['dog_scale']), 0)
             
-            frame = cv2.GaussianBlur(g1 - g0, (self.preproc_params['Gauss']*3,self.preproc_params['Gauss']*3), 0)
+            frame = cv2.GaussianBlur(g1 - g0, (self.preproc_params['Gauss']* self.preproc_params['dog_scale'],self.preproc_params['Gauss']* self.preproc_params['dog_scale']), 0)
         else:
             frame = cv2.GaussianBlur(frame, (self.preproc_params['Gauss'],self.preproc_params['Gauss']), 0)
             
@@ -183,7 +183,7 @@ class SFM:
         self.F = {}
         start = time.time()
         
-        norm = cv2.NORM_HAMMING
+        norm = cv2.NORM_L2
         N = self.n
         # MIN_MATCH_COUNT = min(12, mmc)
         # MIN_MATCH_COUNT = max(12, mmc)
