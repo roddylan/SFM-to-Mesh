@@ -207,6 +207,11 @@ class SFM:
             for j in range(i+1, N):
                 # print(f"{(i,j)}\n")
                 pbar.set_description(f"{(i,j)}")
+
+                if self.desc[i][1].size == 0 or self.desc[j][1].size == 0:
+                    pbar.write("Empty descriptor! Skipping")
+                    continue
+
                 self.matches[(i,j)] = flann.knnMatch(self.desc[i][1], self.desc[j][1], 2)
                 
                 # self.matches[(i,j)] = flann.knnMatch(self.desc[i], self.desc[j], 2)
