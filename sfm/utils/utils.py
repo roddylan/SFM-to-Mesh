@@ -2,7 +2,7 @@ import numpy as np
 import cv2
 
 def lowpassFilter(img, kernelSize, sigma=1.0, mu=0.0):
-    x, y = np.meshgrid(np.linspace(-1, 1, kernelSize), np.linspace(-1, 1, kernelSize))
+    x, y = np.meshgrid(np.linspace(-(kernelSize - 1) / 2., (kernelSize - 1) / 2., kernelSize), np.linspace(-(kernelSize - 1) / 2., (kernelSize - 1) / 2., kernelSize))
     d = np.sqrt(x*x + y*y)
     kernel = np.exp(-((d - mu)**2 / (2.0 * sigma**2)))
 
