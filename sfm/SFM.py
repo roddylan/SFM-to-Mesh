@@ -65,10 +65,10 @@ class SFM:
 
         if self.preproc_params['dog_flag']:
             # Gaussian difference
-            g0 = cv2.GaussianBlur(frame, (self.preproc_params['Gauss'],self.preproc_params['Gauss']), 0)
-            g1 = cv2.GaussianBlur(frame, (self.preproc_params['Gauss'] * self.preproc_params['dog_scale'],self.preproc_params['Gauss'] * self.preproc_params['dog_scale']), 0)
+            g0 = cv2.GaussianBlur(frame, (self.preproc_params['Gauss'],self.preproc_params['Gauss']), 1.3)
+            g1 = cv2.GaussianBlur(frame, (self.preproc_params['Gauss'],self.preproc_params['Gauss']), 1.5)
             
-            frame = cv2.GaussianBlur(g1 - g0, (self.preproc_params['Gauss']*3,self.preproc_params['Gauss']*3), 0)
+            frame = cv2.GaussianBlur(g1 - g0, (23, 23), 0)
         else:
             frame = cv2.GaussianBlur(frame, (self.preproc_params['Gauss'],self.preproc_params['Gauss']), 0)
             
@@ -183,7 +183,7 @@ class SFM:
         self.F = {}
         start = time.time()
         
-        norm = cv2.NORM_HAMMING
+        norm = cv2.NORM_L2
         N = self.n
         # MIN_MATCH_COUNT = min(12, mmc)
         # MIN_MATCH_COUNT = max(12, mmc)
@@ -208,8 +208,9 @@ class SFM:
                 # self.matches[(i,j)] = flann.knnMatch(self.desc[i], self.desc[j], 2)
                 
                 # Lowe's
+                l = .7
                 for m, n in self.matches[(i, j)]:
-                    if m.distance < 0.7 * n.distance:
+                    if m.distance < l * n.distance:
                         self.good[(i,j)].append(m)
 
                 if len(self.good[(i,j)]) > MIN_MATCH_COUNT:
