@@ -1,6 +1,6 @@
 # SFM To Mesh
 Use `Python 3.9-11`\
-SFM pipeline can be conducted in python or with the COLMAP gui (https://colmap.github.io/install.html)\
+SFM pipeline requires COLMAP gui (https://colmap.github.io/install.html) or PyCOLMAP (CUDA enabled)\
 
 Dataset sources:
 - "southbuilding" from (https://demuc.de/colmap/datasets/)
