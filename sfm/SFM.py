@@ -44,6 +44,8 @@ class SFM:
                             canny_threshold_0=0,
                             canny_threshold_1=100,
                             lowpass_ksize=35,
+                            lowpass_sig=10,
+                            lowpass_mu=0,
                             median_0_ksize=95,
                             median_1_ksize=95,
                             acceptance_threshold=0.1):
@@ -54,6 +56,8 @@ class SFM:
             'Canny_t0': canny_threshold_0,
             'Canny_t1': canny_threshold_1,
             'Lowpass': lowpass_ksize,
+            'Lowpass_sig': lowpass_sig,
+            'Lowpass_mu': lowpass_mu,
             'Median_0': median_0_ksize,
             'Median_1': median_1_ksize,
             'Accept': acceptance_threshold
@@ -74,7 +78,7 @@ class SFM:
             
         edges = cv2.Canny(frame, self.preproc_params['Canny_t0'], self.preproc_params['Canny_t1'])
 
-        edges = utils.lowpassFilter(edges, self.preproc_params['Lowpass'])
+        edges = utils.lowpassFilter(edges, self.preproc_params['Lowpass'], self.preproc_params['Lowpass_sig'], self.preproc_params['Lowpass_mu'])
         ret, mask = cv2.threshold(edges, 128, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
 
         mask = cv2.medianBlur(mask, self.preproc_params['Median_0'])
