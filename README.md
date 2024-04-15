@@ -7,4 +7,5 @@ Dataset sources:
 - "templeRing" from (http://vision.middlebury.edu/mview/data/)
 - "Viking" from (https://github.com/rshilliday/sfm/tree/master/datasets/Viking)
 
-All other datasets made by us
+All other datasets made by us\
+BEGIN BY OPENING THE SFM_PIPELINE JUPYTER NOTEBOOK.
