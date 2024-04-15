@@ -768,8 +768,10 @@ algorithms to automate background noise removal \cite{pcr},
 improving overall mesh quality for both approaches. 
 
 \section{Results}
+\subsection{Initial Evaluation}
 Initial evaluation involved a direct benchmark of 
-BRISK and SIFT feature detectors for various datasets.
+BRISK and SIFT feature detectors for various datasets. 
+(Benchmarks were collected on the same Ryzen 9 5900HS 16GB RAM system on six datasets)
 \begin{figure}[ht!]
     \centering
     \subfloat[SIFT Features]{\includegraphics[width=.2\textwidth]{figures/res/sift.png}}
@@ -792,7 +794,7 @@ SIFT detection is able to find nearly all the points BRISK detection finds, as w
 more subtle features like the entire edge of the box (which BRISK largely fails to detect).
 However, Figure \ref{fig:brt_vs_sit} suggests that these more "nuanced" feature points
 may be more akin to noise (detections on black background) and are unneeded. 
-Additionally, BRISK is considerably faster than SIFT as seen in Table \ref{tbl:kpe_t}
+Furthermore, BRISK is also considerably faster than SIFT as seen in Table \ref{tbl:kpe_t}
 and still produces a large number of high quality points in textured regions 
 (ie. areas with text in Figure \ref{fig:br_vs_si}). 
 \begin{table}[ht!]
@@ -839,6 +841,7 @@ and still produces a large number of high quality points in textured regions
         \\ \hline
     \end{tblr}
 \end{table}
+
 % \section{Results}
 
 % \section{Conclusions}
