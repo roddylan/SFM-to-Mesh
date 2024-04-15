@@ -345,7 +345,7 @@
 \author{\IEEEauthorblockN{Roderick Lan}
 \IEEEauthorblockA{1706751}
 \and
-\IEEEauthorblockN{Abdullah Khadelli}
+\IEEEauthorblockN{Abdullah Khadeli}
 \IEEEauthorblockA{1722102}
 }
 
@@ -975,9 +975,9 @@ non-feature preprocessed sparse reconstruction.
 
 \begin{figure}[ht!]
     \centering
-    \subfloat[No Ft. Preproc.]{\includegraphics[width=.15\textwidth]{figures/ppc/lego5/npp_dense.png}}
+    \subfloat[No Ft. Preproc.]{\includegraphics[width=.13\textwidth]{figures/ppc/lego5/npp_dense.png}}
     \
-    \subfloat[Ft. Preproc.]{\includegraphics[width=.14\textwidth]{figures/ppc/lego5/pp_dense.png}}
+    \subfloat[Ft. Preproc.]{\includegraphics[width=.13\textwidth]{figures/ppc/lego5/pp_dense.png}}
     \caption{Dense Reconstruction without vs with ft. preprocessing}
     \label{fig:ppc_dense}
 \end{figure}
@@ -1055,7 +1055,49 @@ than using camera motion).
 % matching time (vs. COLMAP) while obtaining a 50\% reduction in match count. This
 % is likely a result of 
 \subsection{Noisy Data}
-We evaluated our methodology on two "noisy" datasets, "lego" and "can"
+We evaluated our methodology on two "noisy" datasets, "lego" and "can."
+The dense reconstruction from the lego dataset via 
+our BRISK-SIFT SFM-MVS stack, as well as a sample image are found in 
+Figure \ref{fig:lego_recn}.
+\begin{figure}
+    \centering
+    \subfloat[Sample img]{\includegraphics[width=.2\textwidth]{figures/lego/sample_img.jpg}}
+    \
+    \subfloat[Dense Reconstruction]{\includegraphics[width=.2\textwidth]{figures/lego/lego_dense_brisk.png}}
+    \caption{Lego dataset reconstruction}
+    \label{fig:lego_recn}
+\end{figure}
+The reconstruction shown is relatively accurate with regards to the lego figure,
+although it does fail to capture certain features (likely due to 
+its flat texture and glossy finish). However, there is a significant amount of 
+background noise, likely from elements such as the metal picture frame in the background.
+\\
+Reconstructions for the "can" dataset are shown in Figure \ref{fig:can_n}, and a sample 
+image is shown in Figure \ref{fig:can_n_sampl}
+\begin{figure}
+    \centering
+    \subfloat[SIFT-SIFT]{\includegraphics[width=.2\textwidth]{figures/can/sift.png}}
+    \
+    \subfloat[COLMAP]{\includegraphics[width=.2\textwidth]{figures/can/cmap.png}}
+    \caption{Can dataset reconstruction}
+    \label{fig:can_n}
+\end{figure}
+\begin{figure}
+    \centering
+    \includegraphics[width=.2\textwidth]{figures/can/sample.jpeg}
+    \caption{Sample image from "can"}
+    \label{fig:can_n_sampl}
+\end{figure}
+Unfortunately, our BRISK-SIFT based SFM pipeline was unable to create 
+sufficient matches for this object,
+and thus could not create a reconstruction. We believe this is due to
+the following reasons:
+\begin{list}{}{}
+    \item 
+\end{list}
+
+
+
 
 
 \subsection{Point Cloud Processing Evaluation}
@@ -1100,7 +1142,7 @@ Roderick Lan implemented the BRISK-SIFT feature extraction stack, feature matchi
 the Difference of Gaussian method in feature preprocessing, point cloud outlier removal, 
 and poisson surface reconstruction.
 \\
-Abdullah Khadelli implemented the feature preprocessing algorithm, interaction with
+Abdullah Khadeli implemented the feature preprocessing algorithm, interaction with
 PyCOLMAP and COLMAP, and the ball pivot algorithm. Additionally, he handled 
 benchmarking. 
 
