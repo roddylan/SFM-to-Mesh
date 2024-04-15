@@ -983,7 +983,10 @@ non-feature preprocessed sparse reconstruction.
 \end{figure}
 The dense reconstruction of the feature preprocessed dataset (shown in 
 Figure \ref{fig:ppc_dense}) also appears to be denser than the non-preprocessed
-dataset (note the )
+dataset (note the legs). Feature match refinement from preprocessing
+is shown in Figure \ref{fig:ppc_fmatch}. This is especially useful in cases where
+the object moves independent of the environment (ie. user rotates object rather 
+than using camera motion).
 
 \begin{figure}[ht!]
     \centering
@@ -995,13 +998,75 @@ dataset (note the )
     }
     \caption{Feature Matches without vs with Feature Preproccessing 
     on lego5 sample image}
+    \label{fig:ppc_fmatch}
 \end{figure}
+% \subsection{Feature Matching Evaluation (Benchmarking)}
+% Benchmark evaluation of our feature matching (approx. nearest neighbor,
+% MAGSAC++, etc.) against COLMAP.
+% \begin{table}[ht!]
+%     \centering
+%     \label{tbl:match_t}
+%     \caption{Matching Time (s)}
+%     \begin{tblr}{|c|c|c|}
+%         \hline
+%         Dataset & COLMAP  & Ours (MAGSAC++, etc.) \\
+%         \hline \hline
+%         Temple Ring \cite{temple} & 11.548 & 23.600 \\
+%         \hline
+%         Viking \cite{viking} & 13.098 & 88.046 \\
+%         \hline
+%         SSD Box & 20.277 & 38.348 \\
+%         \hline
+%         Lego5 & 79.560 & 104.346 \\
+%         \hline
+%         Keyboard & 320.918 & 178.749 \\
+%         \hline
+%         Ace Coffee Building & 81.414 & 77.786
+%         \\
+%         \hline
+%     \end{tblr}
+% \end{table}
+
+% \begin{table}[ht!]
+%     \centering
+%     \label{tbl:match_c}
+%     \caption{Match Count}
+%     \begin{tblr}{|c|c|c|}
+%         \hline
+%         Dataset & COLMAP  & Ours (MAGSAC++, etc.) \\
+%         \hline \hline
+%         Temple Ring \cite{temple} & 103481 & 23222 \\
+%         \hline
+%         Viking \cite{viking} & 56929 & 48050 \\
+%         \hline
+%         SSD Box & 106321 & 53162 \\
+%         \hline
+%         Lego5 & 131052 & 70341 \\
+%         \hline
+%         Keyboard & 202003 & 46002 \\
+%         \hline
+%         Ace Coffee Building & 74156 & 43474
+%         \\
+%         \hline
+%     \end{tblr}
+% \end{table}
+% From Tables \ref{tbl:match_t} and \ref{tbl:match_c}, we bear a high computational
+% cost in our matching implementation, where we see a 2.2x average increase in 
+% matching time (vs. COLMAP) while obtaining a 50\% reduction in match count. This
+% is likely a result of 
 \subsection{Noisy Data}
+We evaluated our methodology on two "noisy" datasets, "lego" and "can"
+
+
+\subsection{Point Cloud Processing Evaluation}
+We evaluate our point cloud processing methodologies by applying them 
+to the resultant point clouds of three datasets (via our SFM-MVS workflow).
+These datasets are "lego", "templeRing" \cite{temple}, and "ace"
 
 
 % \section{Results}
 
-% \section{Conclusions}
+\section{Conclusions}
 
 
 % \section{}
@@ -1020,15 +1085,24 @@ dataset (note the )
 
 
 
-% use section* for acknowledgment
-\ifCLASSOPTIONcompsoc
-  % The Computer Society usually uses the plural form
-  \section*{Acknowledgments}
-\else
-  % regular IEEE prefers the singular form
-  \section*{Acknowledgment}
-\fi
+% % use section* for acknowledgment
+% \ifCLASSOPTIONcompsoc
+%   % The Computer Society usually uses the plural form
+%   \section*{Acknowledgments}
+% \else
+%   % regular IEEE prefers the singular form
+%   \section*{Acknowledgment}
+% \fi
 
+
+\section*{Author Contributions}
+Roderick Lan implemented the BRISK-SIFT feature extraction stack, feature matching,
+the Difference of Gaussian method in feature preprocessing, point cloud outlier removal, 
+and poisson surface reconstruction.
+\\
+Abdullah Khadelli implemented the feature preprocessing algorithm, interaction with
+PyCOLMAP and COLMAP, and the ball pivot algorithm. Additionally, he handled 
+benchmarking. 
 
 % The authors would like to thank...
 
