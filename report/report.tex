@@ -345,7 +345,7 @@
 \author{\IEEEauthorblockN{Roderick Lan}
 \IEEEauthorblockA{1706751}
 \and
-\IEEEauthorblockN{Abdullah Khadelli}
+\IEEEauthorblockN{Abdullah Khadeli}
 \IEEEauthorblockA{1722102}
 }
 
@@ -975,9 +975,9 @@ non-feature preprocessed sparse reconstruction.
 
 \begin{figure}[ht!]
     \centering
-    \subfloat[No Ft. Preproc.]{\includegraphics[width=.15\textwidth]{figures/ppc/lego5/npp_dense.png}}
+    \subfloat[No Ft. Preproc.]{\includegraphics[width=.13\textwidth]{figures/ppc/lego5/npp_dense.png}}
     \
-    \subfloat[Ft. Preproc.]{\includegraphics[width=.14\textwidth]{figures/ppc/lego5/pp_dense.png}}
+    \subfloat[Ft. Preproc.]{\includegraphics[width=.13\textwidth]{figures/ppc/lego5/pp_dense.png}}
     \caption{Dense Reconstruction without vs with ft. preprocessing}
     \label{fig:ppc_dense}
 \end{figure}
@@ -1055,20 +1055,182 @@ than using camera motion).
 % matching time (vs. COLMAP) while obtaining a 50\% reduction in match count. This
 % is likely a result of 
 \subsection{Noisy Data}
-We evaluated our methodology on two "noisy" datasets, "lego" and "can"
+We evaluated our methodology on two "noisy" datasets, "lego" and "can."
+The dense reconstruction from the lego dataset via 
+our BRISK-SIFT SFM-MVS stack, as well as a sample image are found in 
+Figure \ref{fig:lego_recn}.
+\begin{figure}
+    \centering
+    \subfloat[Sample img]{\includegraphics[width=.2\textwidth]{figures/lego/sample_img.jpg}}
+    \
+    \subfloat[Dense Reconstruction]{\includegraphics[width=.2\textwidth]{figures/lego/lego_dense_brisk.png}}
+    \caption{Lego dataset reconstruction}
+    \label{fig:lego_recn}
+\end{figure}
+The reconstruction shown is relatively accurate with regards to the lego figure,
+although it does fail to capture certain features (likely due to 
+its flat texture and glossy finish). However, there is a significant amount of 
+background noise, likely from elements such as the metal picture frame in the background.
+\\
+Reconstructions for the "can" dataset are shown in Figure \ref{fig:can_n}, and a sample 
+image is shown in Figure \ref{fig:can_n_sampl}
+\begin{figure}
+    \centering
+    \subfloat[SIFT-SIFT]{\includegraphics[width=.2\textwidth]{figures/can/sift.png}}
+    \
+    \subfloat[COLMAP]{\includegraphics[width=.2\textwidth]{figures/can/cmap.png}}
+    \caption{Can dataset reconstruction}
+    \label{fig:can_n}
+\end{figure}
+\begin{figure}
+    \centering
+    \includegraphics[width=.2\textwidth]{figures/can/sample.jpeg}
+    \caption{Sample image from "can"}
+    \label{fig:can_n_sampl}
+\end{figure}
+Unfortunately, our BRISK-SIFT based SFM pipeline was unable to create 
+sufficient matches for this object,
+and thus could not create a reconstruction. We believe this is due to
+a lack of viable edges as well as the can's glossy and reflective surface, 
+making it difficult to satisfy the 9/16 condition \cite{brisk}. 
+We believe the resultant point cloud representations shown in Figure \ref{fig:can_n}
+are look poor for similar reasons (ie. glossy surface). 
+
 
 
 \subsection{Point Cloud Processing Evaluation}
 We evaluate our point cloud processing methodologies by applying them 
-to the resultant point clouds of three datasets (via our SFM-MVS workflow).
-These datasets are "lego", "templeRing" \cite{temple}, and "ace"
+to the resultant point clouds of four datasets (via our SFM-MVS workflow).
+These datasets are "lego", "templeRing" \cite{temple}, "Viking" \cite{viking}, 
+and "ace." As mentioned in 
+the previous section, the "lego" dataset results in a rather noisy reconstruction. 
+Applying our outlier removal strategies, however, appear to significantly improve
+it (Figure \ref{fig:lego_out}).
 
+\begin{figure}[ht!]
+    \centering
+    \subfloat[Noisy Pointcloud]{\includegraphics[width=.2\textwidth]{figures/lego/lego_dense_brisk.png}}
+    \
+    \subfloat[Outlier Removal]{\includegraphics[width=.2\textwidth]{figures/lego/lego_dense_brisk_clean.png}}
+    \caption{Outlier Removal on lego}
+    \label{fig:lego_out}
+\end{figure}
+Similarly, we find that outlier processing can be applied to other, less 
+noisy datasets to eliminate some unnecessary structure (refer to Figure \ref{fig:ocd}).
+\begin{figure}
+    \centering
+    \subfloat[templeRing \cite{temple}]{\includegraphics[width=.1\textwidth]{figures/dense/temple_raw.png}}
+    \
+    \subfloat[Viking \cite{viking}]{\includegraphics[width=.1\textwidth]{figures/dense/viking_raw.png}}
+    \
+    \subfloat[ace]{\includegraphics[width=.2\textwidth]{figures/dense/ace_raw.png}}
+    \caption{Raw point cloud reconstructions}
+    \label{fig:rcd}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \subfloat[templeRing \cite{temple}]{\includegraphics[width=.1\textwidth]{figures/dense/temple_cleaned.png}}
+    \
+    \subfloat[Viking \cite{viking}]{\includegraphics[width=.1\textwidth]{figures/dense/viking_cleaned.png}}
+    \
+    \subfloat[ace]{\includegraphics[width=.2\textwidth]{figures/dense/ace_cleaned.png}}
+    \caption{Outlier removal}
+    \label{fig:ocd}
+\end{figure}
+
+We can then apply our mesh reconstruction algorithms, shown in Figures 
+\ref{fig:bpa_clean} and \ref{fig:psr_clean}. 
+
+\begin{figure}[ht!]
+    \centering
+    \subfloat[]{\includegraphics[width=.1\textwidth]{figures/bpa/lego raw.png}}
+    \
+    \subfloat[]{\includegraphics[width=.1\textwidth]{figures/bpa/temple_bpa_raw.png}}
+    \
+    \subfloat[]{\includegraphics[width=.1\textwidth]{figures/bpa/viking_bpa_raw.png}}
+    \
+    \subfloat[]{\includegraphics[width=.1\textwidth]{figures/bpa/ace_bpa_raw.png}}
+    \caption{BPA on raw reconstructions}
+    \label{fig:bpa_raw}
+\end{figure}
+
+
+\begin{figure}[ht!]
+    \centering
+    \subfloat[]{\includegraphics[width=.1\textwidth]{figures/bpa/lego clean.png}}
+    \
+    \subfloat[]{\includegraphics[width=.1\textwidth]{figures/bpa/temple_bpa_cleaned.png}}
+    \
+    \subfloat[]{\includegraphics[width=.1\textwidth]{figures/bpa/viking_bpa_cleaned.png}}
+    \
+    \subfloat[]{\includegraphics[width=.1\textwidth]{figures/bpa/ace_bpa_cleaned.png}}
+    \caption{BPA on outlier removed reconstructions}
+    \label{fig:bpa_clean}
+\end{figure}
+
+
+\begin{figure}[ht!]
+    \centering
+    \subfloat[]{\includegraphics[width=.1\textwidth]{figures/psr/lego_raw_psr.png}}
+    \
+    \subfloat[]{\includegraphics[width=.1\textwidth]{figures/psr/temple_psr_raw.png}}
+    \
+    \subfloat[]{\includegraphics[width=.1\textwidth]{figures/psr/viking_psr_raw.png}}
+    \
+    \subfloat[]{\includegraphics[width=.1\textwidth]{figures/psr/ace_psr_raw.png}}
+    \caption{PSR on raw reconstructions}
+    \label{fig:psr_raw}
+\end{figure}
+
+\begin{figure}[ht!]
+    \centering
+    \subfloat[]{\includegraphics[width=.1\textwidth]{figures/psr/lego_clean_psr.png}}
+    \
+    \subfloat[]{\includegraphics[width=.1\textwidth]{figures/psr/temple_psr_cleaned.png}}
+    \
+    \subfloat[]{\includegraphics[width=.1\textwidth]{figures/psr/viking_psr_cleaned.png}}
+    \
+    \subfloat[]{\includegraphics[width=.1\textwidth]{figures/psr/ace_psr_cleaned.png}}
+    \caption{PSR on outlier removed reconstructions}
+    \label{fig:psr_clean}
+\end{figure}
+
+We can see that PSR is often times a better alternative to BPA as it provides a cleaner, 
+higher quality mesh compared to BPA. However, significant environmental noise, as in 
+Figure \ref{fig:psr_raw}, can cause diminished results. 
 
 % \section{Results}
 
-\section{Conclusions}
+\section{Conclusion and Future Work}
+This paper presents improvements to existing SFM-MVS pipelines. 
+We proposed an alternative approach to feature extraction, 
+by implementing BRISK features as a faster alternative to the SIFT features
+commonly used in existing systems. Although there exist situations where
+BRISK features are not as performant as SIFT, we believe that our SFM-MVS pipeline
+can still be effective in most cases. 
+Furthermore, we presented a feature preprocessing pipeline, 
+which has shown to be effective at clearing background noise, 
+and masking the object of interest. 
+Additionally, we improved feature matching by implementing 
+approximate nearest neighbor searches and match refinement 
+through MAGSAC++. Visual analysis of different surface reconstruction 
+techniques leads us to believe that PSR is superior for reconstructing 
+meshes. We found throughout testing and evaluation that ideal image datasets 
+require well textured objects, constant illumination conditions, 
+smooth backdrops, a high quantity of images with sufficient visual
+overlap and sufficient parallax. Our versatile system has proven to be 
+capable of reconstructing high quality meshes in reasonable time, for 
+datasets of varying complexity.
 
 
+\subsection{Future Work}
+There is significant room for future work to imrpove and extend our SFM-MVS system. One crucial 
+improvement would be implementing CUDA libraries to increase the efficiency
+of feature extraction, matching, incremental mapping, and surface reconstruction. 
+Additionally, we would like to explore the implementation of a BRISK-like algorithm
+on top of a DoG octave, with the goal of creating a pseudo SIFT-BRISK detection 
+algorithm for more robust keypoints at similar speeds to BRISK. 
 % \section{}
 
 
@@ -1100,7 +1262,7 @@ Roderick Lan implemented the BRISK-SIFT feature extraction stack, feature matchi
 the Difference of Gaussian method in feature preprocessing, point cloud outlier removal, 
 and poisson surface reconstruction.
 \\
-Abdullah Khadelli implemented the feature preprocessing algorithm, interaction with
+Abdullah Khadeli implemented the feature preprocessing algorithm, interaction with
 PyCOLMAP and COLMAP, and the ball pivot algorithm. Additionally, he handled 
 benchmarking. 
 
