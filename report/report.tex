@@ -1091,24 +1091,119 @@ image is shown in Figure \ref{fig:can_n_sampl}
 Unfortunately, our BRISK-SIFT based SFM pipeline was unable to create 
 sufficient matches for this object,
 and thus could not create a reconstruction. We believe this is due to
-the following reasons:
-\begin{list}{}{}
-    \item 
-\end{list}
-
-
+a lack of viable edges as well as the can's glossy and reflective surface, 
+making it difficult to satisfy the 9/16 condition \cite{brisk}. 
+We believe the resultant point cloud representations shown in Figure \ref{fig:can_n}
+are look poor for similar reasons (ie. glossy surface). 
 
 
 
 \subsection{Point Cloud Processing Evaluation}
 We evaluate our point cloud processing methodologies by applying them 
-to the resultant point clouds of three datasets (via our SFM-MVS workflow).
-These datasets are "lego", "templeRing" \cite{temple}, and "ace"
+to the resultant point clouds of four datasets (via our SFM-MVS workflow).
+These datasets are "lego", "templeRing" \cite{temple}, "Viking" \cite{viking}, 
+and "ace." As mentioned in 
+the previous section, the "lego" dataset results in a rather noisy reconstruction. 
+Applying our outlier removal strategies, however, appear to significantly improve
+it (Figure \ref{fig:lego_out}).
 
+\begin{figure}[ht!]
+    \centering
+    \subfloat[Noisy Pointcloud]{\includegraphics[width=.2\textwidth]{figures/lego/lego_dense_brisk.png}}
+    \
+    \subfloat[Outlier Removal]{\includegraphics[width=.2\textwidth]{figures/lego/lego_dense_brisk_clean.png}}
+    \caption{Outlier Removal on lego}
+    \label{fig:lego_out}
+\end{figure}
+Similarly, we find that outlier processing can be applied to other, less 
+noisy datasets to eliminate some unnecessary structure (refer to Figure \ref{fig:ocd}).
+\begin{figure}
+    \centering
+    \subfloat[templeRing \cite{temple}]{\includegraphics[width=.1\textwidth]{figures/dense/temple_raw.png}}
+    \
+    \subfloat[Viking \cite{viking}]{\includegraphics[width=.1\textwidth]{figures/dense/viking_raw.png}}
+    \
+    \subfloat[ace]{\includegraphics[width=.2\textwidth]{figures/dense/ace_raw.png}}
+    \caption{Raw point cloud reconstructions}
+    \label{fig:rcd}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \subfloat[templeRing \cite{temple}]{\includegraphics[width=.1\textwidth]{figures/dense/temple_cleaned.png}}
+    \
+    \subfloat[Viking \cite{viking}]{\includegraphics[width=.1\textwidth]{figures/dense/viking_cleaned.png}}
+    \
+    \subfloat[ace]{\includegraphics[width=.2\textwidth]{figures/dense/ace_cleaned.png}}
+    \caption{Outlier removal}
+    \label{fig:ocd}
+\end{figure}
+
+We can then apply our mesh reconstruction algorithms, shown in Figures 
+\ref{fig:bpa_clean} and \ref{fig:psr_clean}. 
+
+\begin{figure}[ht!]
+    \centering
+    \subfloat[]{\includegraphics[width=.1\textwidth]{figures/bpa/lego raw.png}}
+    \
+    \subfloat[]{\includegraphics[width=.1\textwidth]{figures/bpa/temple_bpa_raw.png}}
+    \
+    \subfloat[]{\includegraphics[width=.1\textwidth]{figures/bpa/viking_bpa_raw.png}}
+    \
+    \subfloat[]{\includegraphics[width=.1\textwidth]{figures/bpa/ace_bpa_raw.png}}
+    \caption{BPA on raw reconstructions}
+    \label{fig:bpa_raw}
+\end{figure}
+
+
+\begin{figure}[ht!]
+    \centering
+    \subfloat[]{\includegraphics[width=.1\textwidth]{figures/bpa/lego clean.png}}
+    \
+    \subfloat[]{\includegraphics[width=.1\textwidth]{figures/bpa/temple_bpa_cleaned.png}}
+    \
+    \subfloat[]{\includegraphics[width=.1\textwidth]{figures/bpa/viking_bpa_cleaned.png}}
+    \
+    \subfloat[]{\includegraphics[width=.1\textwidth]{figures/bpa/ace_bpa_cleaned.png}}
+    \caption{BPA on outlier removed reconstructions}
+    \label{fig:bpa_clean}
+\end{figure}
+
+
+\begin{figure}[ht!]
+    \centering
+    \subfloat[]{\includegraphics[width=.1\textwidth]{figures/psr/lego_raw_psr.png}}
+    \
+    \subfloat[]{\includegraphics[width=.1\textwidth]{figures/psr/temple_psr_raw.png}}
+    \
+    \subfloat[]{\includegraphics[width=.1\textwidth]{figures/psr/viking_psr_raw.png}}
+    \
+    \subfloat[]{\includegraphics[width=.1\textwidth]{figures/psr/ace_psr_raw.png}}
+    \caption{PSR on raw reconstructions}
+    \label{fig:psr_raw}
+\end{figure}
+
+\begin{figure}[ht!]
+    \centering
+    \subfloat[]{\includegraphics[width=.1\textwidth]{figures/psr/lego_clean_psr.png}}
+    \
+    \subfloat[]{\includegraphics[width=.1\textwidth]{figures/psr/temple_psr_cleaned.png}}
+    \
+    \subfloat[]{\includegraphics[width=.1\textwidth]{figures/psr/viking_psr_cleaned.png}}
+    \
+    \subfloat[]{\includegraphics[width=.1\textwidth]{figures/psr/ace_psr_cleaned.png}}
+    \caption{PSR on outlier removed reconstructions}
+    \label{fig:psr_clean}
+\end{figure}
+
+We can see that PSR is often times a better alternative to BPA as it provides a cleaner, 
+higher quality mesh compared to BPA. However, significant environmental noise, as in 
+Figure \ref{fig:psr_raw}. 
 
 % \section{Results}
 
-\section{Conclusions}
+\section{Conclusion and Future Work}
+
 
 
 % \section{}
