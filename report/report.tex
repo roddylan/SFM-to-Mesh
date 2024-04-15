@@ -1198,14 +1198,39 @@ We can then apply our mesh reconstruction algorithms, shown in Figures
 
 We can see that PSR is often times a better alternative to BPA as it provides a cleaner, 
 higher quality mesh compared to BPA. However, significant environmental noise, as in 
-Figure \ref{fig:psr_raw}. 
+Figure \ref{fig:psr_raw}, can cause diminished results. 
 
 % \section{Results}
 
 \section{Conclusion and Future Work}
+This paper presents improvements to existing SFM-MVS pipelines. 
+We proposed an alternative approach to feature extraction, 
+by implementing BRISK features as a faster alternative to the SIFT features
+commonly used in existing systems. Although there exist situations where
+BRISK features are not as performant as SIFT, we believe that our SFM-MVS pipeline
+can still be effective in most cases. 
+Furthermore, we presented a feature preprocessing pipeline, 
+which has shown to be effective at clearing background noise, 
+and masking the object of interest. 
+Additionally, we improved feature matching by implementing 
+approximate nearest neighbor searches and match refinement 
+through MAGSAC++. Visual analysis of different surface reconstruction 
+techniques leads us to believe that PSR is superior for reconstructing 
+meshes. We found throughout testing and evaluation that ideal image datasets 
+require well textured objects, constant illumination conditions, 
+smooth backdrops, a high quantity of images with sufficient visual
+overlap and sufficient parallax. Our versatile system has proven to be 
+capable of reconstructing high quality meshes in reasonable time, for 
+datasets of varying complexity.
 
 
-
+\subsection{Future Work}
+There is significant room for future work to imrpove and extend our SFM-MVS system. One crucial 
+improvement would be implementing CUDA libraries to increase the efficiency
+of feature extraction, matching, incremental mapping, and surface reconstruction. 
+Additionally, we would like to explore the implementation of a BRISK-like algorithm
+on top of a DoG octave, with the goal of creating a pseudo SIFT-BRISK detection 
+algorithm for more robust keypoints at similar speeds to BRISK. 
 % \section{}
 
 
