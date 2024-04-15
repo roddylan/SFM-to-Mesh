@@ -789,14 +789,18 @@ BRISK and SIFT feature detectors for various datasets.
     \label{fig:brt_vs_sit}
 \end{figure}
 Both Figures \ref{fig:br_vs_si} and \ref{fig:brt_vs_sit}, as well as Table \ref{tbl:kpe_n}, 
-demonstrate a substantial difference in overall ability. Referring to Figure \ref{fig:br_vs_si}, it is clear that 
-SIFT detection is able to find nearly all the points BRISK detection finds, as well as
+demonstrate a substantial difference in overall ability. Referring to Figure \ref{fig:br_vs_si}, we see that 
+SIFT detection is able to find nearly all the points BRISK detection finds, 
+as well as
 more subtle features like the entire edge of the box (which BRISK largely fails to detect).
-However, Figure \ref{fig:brt_vs_sit} suggests that these more "nuanced" feature points
-may be more akin to noise (detections on black background) and are unneeded. 
-Furthermore, BRISK is also considerably faster than SIFT as seen in Table \ref{tbl:kpe_t}
+In cases where these types of low-texture, subtle features are important, our BRISK-SIFT SFM 
+may not be viable compared to traditional SIFT-SIFT. 
+However, figure \ref{fig:brt_vs_sit} suggests that the more "nuanced" feature points
+may also be more akin to noise (detections on black background) and unneeded. 
+Furthermore, BRISK is considerably faster than SIFT ($\sim$2.3x faster) as seen in Table \ref{tbl:kpe_t}
 and still produces a large number of high quality points in textured regions 
-(ie. areas with text in Figure \ref{fig:br_vs_si}). 
+(ie. areas with text in Figure \ref{fig:br_vs_si})
+(surprisingly, BRISK yields 29\% more points than SIFT does on average). 
 \begin{table}[ht!]
     \centering
     \caption{Keypoint Extraction (No. of keypoints extracted)}
@@ -841,6 +845,159 @@ and still produces a large number of high quality points in textured regions
         \\ \hline
     \end{tblr}
 \end{table}
+
+\subsection{COLMAP Comparison}
+We evaluate the results of BRISK-SIFT feature extraction against both 
+traditional SIFT-SIFT (on our SFM stack) and results from COLMAP on 
+the "templeRing" \cite{temple} dataset. 
+% two datasets,
+% "templeRing" \cite{temple} and "kb2". 
+\begin{figure}[ht!]
+    \centering
+    \subfloat[BRISK-SIFT Sparse]
+    {\includegraphics[width=.17\textwidth]{figures/colmap comp/sparse_brisk.png}}
+    \ \ \ 
+    \subfloat[SIFT-SIFT Sparse]
+    {\includegraphics[width=.17\textwidth]{figures/colmap comp/sift sparse.png}}
+    \\
+    \subfloat[COLMAP Sparse]
+    {\includegraphics[width=.4\textwidth]{figures/colmap comp/sparse colmap.png}}
+    \caption{Sparse Reconstruction of our SFM stack (with BRISK-SIFT and SIFT-SIFT) and full COLMAP}
+    \label{fig:temple_sparse_comp}
+\end{figure}
+In Figure \ref{fig:temple_sparse_comp}, we see that our SFM stack (for both
+BRISK-SIFT and SIFT-SIFT) results in a sparser point cloud compared to 
+pure COLMAP, however considerably less visible noise as well. 
+With BRISK-SIFT in particular, our SFM stack results in a sparser point cloud
+compared to other methods (likely due to less detections), however it also 
+contains the least amount of noise in the reconstructed points. In 
+Figure \ref{fig:temple_dense_comp}, we see that the dense reconstruction from 
+COLMAP's MVS \cite{schoenberger2016mvs} with our BRISK-SIFT SFM stack is nearly identical to both 
+our SIFT-SIFT and COLMAP with the exception of a small gap. This is likely due to 
+the difference in matched features, causing slightly different camera and pose estimation.
+Nonetheless, all these point clouds provide a reasonably accurate 3D represenation
+of the object. 
+
+
+\begin{figure}[ht!]
+    \centering
+    \subfloat[BRISK-SIFT Dense Rec.]
+    {\includegraphics[width=.17\textwidth]{figures/colmap comp/dense brisk.png}}
+    \ \ \ 
+    \subfloat[SIFT-SIFT Dense Rec. (noisy off screen)]
+    {\includegraphics[width=.17\textwidth]{figures/colmap comp/dense sift.png}}
+    \\
+    \subfloat[COLMAP Dense Rec.]
+    {\includegraphics[width=.3\textwidth]{figures/colmap comp/dense colmap.png}}
+    \caption{Dense Reconstruction of our SFM stack (with BRISK-SIFT and SIFT-SIFT) and full COLMAP}
+    \label{fig:temple_dense_comp}
+\end{figure}
+
+
+\subsection{Feature Preprocessing Evaluation}
+We evaluate our feature preprocessing 
+(a method of key point cleanup during feature extraction) 
+with a benchmark test 
+(same as Table \ref{tbl:kpe_n} and Table \ref{tbl:kpe_t}) and 
+a visual test on the "lego5" dataset. 
+\subsubsection{Benchmarks}
+\begin{table}[ht!]
+    \centering
+    \caption{Feature Preprocessing (Ft. Extraction Time (s))}
+    \label{tbl:ppc_t}
+    \begin{tblr}{|c|c|c|}
+        \hline
+        Dataset & No Img Preproc.  & Image Preproc. \\
+        \hline \hline
+        Temple Ring \cite{temple} & 1.2922 & 2.3747 \\
+        \hline
+        Viking \cite{viking} & 3.2936 & 4.6455 \\
+        \hline
+        SSD Box & 5.8452 & 9.6800 \\
+        \hline
+        Lego5 & 16.2658 & 30.7978 \\
+        \hline
+        Keyboard & 12.0966 & 22.5780 \\
+        \hline
+        Ace Coffee Building & 7.2542 & 12.3442
+        \\
+        \hline
+    \end{tblr}
+\end{table}
+
+
+\begin{table}[ht!]
+    \centering
+    \caption{Feature Preprocessing (Ft. Matching Time (s))}
+    \label{tbl:ppc_mt}
+    \begin{tblr}{|c|c|c|}
+        \hline
+        Dataset & No Img Preproc.  & Image Preproc. \\
+        \hline \hline
+        Temple Ring \cite{temple} & 23.600 & 22.989 \\
+        \hline
+        Viking \cite{viking} & 88.046 & 87.223 \\
+        \hline
+        SSD Box & 38.348 & 36.611 \\
+        \hline
+        Lego5 & 104.346 & 101.194 \\
+        \hline
+        Keyboard & 178.749 & 178.099 \\
+        \hline
+        Ace Coffee Building & 77.786 & 72.757
+        \\
+        \hline
+    \end{tblr}
+\end{table}
+Table \ref{tbl:ppc_mt} shows that feature preprocessing provides a marginal benefit 
+for matching ($\sim$2\% reduction in time on average). However, Table \ref{tbl:ppc_t}
+shows that it also causes a $\sim$70\% increase in feature extraction time (on average), 
+significantly lengthening the overall search process for a slight refinement
+($\sim$5\% less matches on average). Still, it is worth noting that the increased 
+feature extraction times (Table \ref{tbl:ppc_t}) are still faster than
+using SIFT (Table \ref{tbl:kpe_t})
+
+
+\subsubsection{Visual Test}
+To further evaluate feature preprocessing, we apply our DoG implementation to 
+the "lego5" dataset. The resulting reconstructions are shown in Figures \ref{fig:ppc_sparse}
+and \ref{fig:ppc_dense}. 
+\begin{figure}[ht!]
+    \centering
+    \subfloat[No Ft. Preproc.]{\includegraphics[width=.15\textwidth]{figures/ppc/lego5/npp_sparse.png}}
+    \
+    \subfloat[Ft. Preproc.]{\includegraphics[width=.2\textwidth]{figures/ppc/lego5/pp_sparse.png}}
+    \caption{Sparse Reconstruction without vs with ft. preprocessing}
+    \label{fig:ppc_sparse}
+\end{figure}
+From Figure \ref{fig:ppc_sparse}, we see that there is much more noise in the
+non-feature preprocessed sparse reconstruction. 
+
+\begin{figure}[ht!]
+    \centering
+    \subfloat[No Ft. Preproc.]{\includegraphics[width=.15\textwidth]{figures/ppc/lego5/npp_dense.png}}
+    \
+    \subfloat[Ft. Preproc.]{\includegraphics[width=.14\textwidth]{figures/ppc/lego5/pp_dense.png}}
+    \caption{Dense Reconstruction without vs with ft. preprocessing}
+    \label{fig:ppc_dense}
+\end{figure}
+The dense reconstruction of the feature preprocessed dataset (shown in 
+Figure \ref{fig:ppc_dense}) also appears to be denser than the non-preprocessed
+dataset (note the )
+
+\begin{figure}[ht!]
+    \centering
+    \subfloat[No Ft. Preproc.]
+    {\includegraphics[width=.4\textwidth]{figures/ppc/matches/before.png}}
+    \\
+    \subfloat[With Ft. Preproc.]{
+    {\includegraphics[width=.4\textwidth]{figures/ppc/matches/after.png}}
+    }
+    \caption{Feature Matches without vs with Feature Preproccessing 
+    on lego5 sample image}
+\end{figure}
+\subsection{Noisy Data}
+
 
 % \section{Results}
 
